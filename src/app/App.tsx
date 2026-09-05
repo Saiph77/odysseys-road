@@ -1,85 +1,77 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { assetsManifest } from '../config/assets.manifest';
 import { getTotalScreens, storyConfig } from '../config/story.config';
 import { contentRegistry } from '../content/registry';
-import { ChapterRuntime } from '../core/ChapterRuntime';
-import {
-  ScrollProgressSource,
-  scrollToProgress,
-} from '../core/ProgressSource';
-import { StoryDirector } from '../core/StoryDirector';
+import { StorySession } from '../core/StorySession';
 import { assertValidStory } from '../core/validateStory';
 import { DevRoadPanel, ChapterNav } from '../components/DevRoadPanel';
 import { RendererStage } from '../components/RendererStage';
 import { DomRenderer } from '../renderers/DomRenderer';
-import { NullAudioBus, registerRenderer } from '../renderers/rendererRegistry';
-import { progressForChapterRoad } from '../core/StoryDirector';
-
-assertValidStory(storyConfig, assetsManifest, { registeredRenderers: ['dom', 'sequence'] });
+import { SequencePlaceholder } from '../renderers/SequencePlaceholder';
+import {
+  NullAudioBus,
+  registerRenderer,
+  getRegisteredRendererKeys,
+} from '../renderers/rendererRegistry';
 
 registerRenderer('dom', () => new DomRenderer());
+registerRenderer('sequence', () => new SequencePlaceholder());
+assertValidStory(storyConfig, assetsManifest, { registeredRenderers: getRegisteredRendererKeys() });
 
 const debugMode = new URLSearchParams(window.location.search).get('debug') === '1';
 
-export function App() {
-  const director = useMemo(() => new StoryDirector(storyConfig), []);
-  const runtime = useMemo(() => new ChapterRuntime(), []);
-  const scrollSource = useMemo(() => new ScrollProgressSource(), []);
-  const [frame, setFrame] = useState(() => director.fromProgress(0));
+function DebugView({ session }: { session: StorySession }) {
+  const frame = useSyncExternalStore(session.subscribe, session.getSnapshot);
+  return (
+    <DevRoadPanel
+      config={storyConfig}
+      frame={frame}
+      onSeek={session.seek}
+      manifest={assetsManifest}
+    />
+  );
+}
 
-  const rendererContext = useMemo(
+export function App() {
+  const session = useMemo(() => new StorySession(storyConfig), []);
+  const [chapter, setChapter] = useState(session.getSnapshot().chapterId);
+  const context = useMemo(
     () => ({
       assets: assetsManifest,
       content: contentRegistry,
-      latch: runtime.latch,
+      latch: session.runtime.latch,
       audio: new NullAudioBus(),
       reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     }),
-    [runtime],
+    [session],
   );
-
   useEffect(() => {
-    runtime.mount();
-    scrollSource.start((progress) => {
-      setFrame(director.fromProgress(progress, scrollSource.kind));
+    let chapterId = session.getSnapshot().chapterId;
+    const unsubscribe = session.subscribe(() => {
+      const next = session.getSnapshot().chapterId;
+      if (next !== chapterId) {
+        chapterId = next;
+        setChapter(next);
+      }
     });
+    session.start();
     return () => {
-      scrollSource.stop();
-      runtime.destroy();
+      unsubscribe();
+      session.stop();
     };
-  }, [director, runtime, scrollSource]);
-
-  const totalScreens = getTotalScreens();
-
-  const seekToProgress = (progress: number) => {
-    scrollToProgress(progress);
-  };
-
-  const seekChapter = (chapterId: string) => {
-    const progress = progressForChapterRoad(storyConfig, chapterId, 0);
-    seekToProgress(progress);
-  };
-
+  }, [session]);
   return (
     <>
       <div className="viewport">
-        <RendererStage
-          frame={frame}
-          context={rendererContext}
-          interaction={DomRenderer.neutralInteraction()}
+        <RendererStage session={session} context={context} />
+        <ChapterNav
+          config={storyConfig}
+          activeChapterId={chapter}
+          onSeekChapter={session.seekChapter}
         />
-        {!debugMode ? (
-          <ChapterNav
-            config={storyConfig}
-            activeChapterId={frame.chapterId}
-            onSeekChapter={seekChapter}
-          />
-        ) : null}
       </div>
-      <div className="stage" style={{ height: `${totalScreens * 100}vh` }} />
-      {debugMode ? (
-        <DevRoadPanel config={storyConfig} frame={frame} onSeek={seekToProgress} manifest={assetsManifest} />
-      ) : null}
+      <div className="stage" style={{ height: `calc(${getTotalScreens() * 100}vh + 100vh)` }} />
+      {debugMode && <DebugView session={session} />}
     </>
   );
 }
