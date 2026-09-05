@@ -31,7 +31,7 @@ T0 Bootstrap（串行，先做）
         └─ T15 MediaPipe 目标设备实测调参
 ```
 
-MVP 完成定义（I1）：从 pre-roll 点击「开始归航」→ 滚动经过 `troy` → 进入 `selection`，头部/指针三区累计 5 秒 → 胜者为 Track 3 时继续向下滚过 `sirens / scylla / cattle / homecoming`，胜者为 Track 1/2 时进入 `memory-pending`；全部章节用占位色块 + 章节名 + 字幕即可，无 WebGL、无音频。
+MVP 完成定义（I1）：从 pre-roll 第一次滚动开始 → 滚动经过 `troy` → 进入 `selection`，头部/指针三区累计 5 秒 → 胜者为 Track 3 时继续向下滚过 `sirens / scylla / cattle / homecoming`，胜者为 Track 1/2 时进入 `memory-pending`；全部章节用占位色块 + 章节名 + 字幕即可，无 WebGL、无音频。
 
 ---
 
@@ -137,13 +137,13 @@ public/
 - [ ] 状态
 - **做什么**：
   - `main.tsx` / `AppRoot.tsx`：按 ARCHITECTURE §2.2 接线（Router、ChapterRuntime、InteractionEngine、RendererStage、ProgressSource、ScrollGate、AudioBus）。第一波期间用 T0 契约 + 本地 stub，I1 时替换为真实实现。
-  - `PreRoll.tsx`：实现 D-004 全流程（一个按钮、音频解锁、摄像头请求、校准文案、4s 失败转指针、两行小字）。
+  - `PreRoll.tsx`：实现 D-004 V2 全流程（无按钮；加载即请求摄像头、状态小字、36 帧滚动校准窗口、首次滚动/按键开始、4s 失败转指针、两行小字）。
   - `MemoryPending.tsx`：「这段记忆尚未归来」+ 返回神谕镜 / 继续 Track 3 两个按钮。
   - `EndState`：海浪循环占位 + 「重新开始」（D-011）。
   - URL 参数：`?debug=1`、`?demo=track3`（跳过 pre-roll 摄像头，直接指针模式）。
 - **拥有**：`src/app/*`、`index.html`、`src/styles/app.css`。
 - **依赖**：T0。
-- **验收**：无摄像头设备时点击按钮 ≤ 5s 内进入正片；拒绝权限走指针；`memory-pending` 两个按钮路由正确；结束态不自动刷新。
+- **验收**：无摄像头设备时首次滚动立即进入正片（不等待摄像头）；拒绝权限走指针；`memory-pending` 两个按钮路由正确；结束态不自动刷新。
 
 ### T6 · Content 与 story.config 内容
 

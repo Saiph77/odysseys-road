@@ -46,7 +46,7 @@ ZoneDwellSelector -> winnerId -> StoryRouter
 
 ### 2.2 输入不是门槛
 
-默认支持 pointer、keyboard；摄像头在 pre-roll 的「开始归航」按钮点击时请求（D-004），并在按钮下方显示：
+默认支持 pointer、keyboard；摄像头在页面加载后立即请求（D-004 V2，无按钮），活画底部显示：
 
 > 影像只在本机处理，不录制、不上传。
 

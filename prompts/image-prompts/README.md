@@ -11,6 +11,7 @@
 | 文件 | 章节 | 用途 |
 | --- | --- | --- |
 | [`00-prologue.md`](00-prologue.md) | Pre-roll + Ch.01 00–10s | 特洛伊陷落 9 镜头 13 帧 Prompt 包（含木马/城门/神像一致性锁） |
+| [`../video-prompts/ch01-troy.md`](../video-prompts/ch01-troy.md) | Ch.01 00–10s | 三段图生视频 Prompt + S1-A 参考图评估 |
 | [`01-sea-hub.md`](01-sea-hub.md) | Ch.02 背景 | 无名之海 |
 | [`01b-track-selection.md`](01b-track-selection.md) | Ch.02 主体 | 三股记忆之流（Track 选择） |
 | [`31-sirens.md`](31-sirens.md) | Ch.03 | 塞壬之歌 |
