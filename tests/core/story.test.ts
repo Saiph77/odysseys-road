@@ -25,9 +25,9 @@ describe('validateStory', () => {
           : chapter,
       ),
     } satisfies StoryConfig;
-    expect(validateStory(bad, assetsManifest, baseOptions).some((i) => i.code === 'DUPLICATE_SCENE')).toBe(
-      true,
-    );
+    expect(
+      validateStory(bad, assetsManifest, baseOptions).some((i) => i.code === 'DUPLICATE_SCENE'),
+    ).toBe(true);
   });
 
   it('rejects road out of timeline', () => {
@@ -47,7 +47,9 @@ describe('validateStory', () => {
       ),
     } satisfies StoryConfig;
     expect(
-      validateStory(bad, assetsManifest, baseOptions).some((i) => i.code === 'ROAD_OUT_OF_TIMELINE'),
+      validateStory(bad, assetsManifest, baseOptions).some(
+        (i) => i.code === 'ROAD_OUT_OF_TIMELINE',
+      ),
     ).toBe(true);
   });
 
@@ -67,9 +69,9 @@ describe('validateStory', () => {
           : chapter,
       ),
     } satisfies StoryConfig;
-    expect(validateStory(bad, assetsManifest, baseOptions).some((i) => i.code === 'SEQUENCE_OVERLAP')).toBe(
-      true,
-    );
+    expect(
+      validateStory(bad, assetsManifest, baseOptions).some((i) => i.code === 'SEQUENCE_OVERLAP'),
+    ).toBe(true);
   });
 
   it('rejects unregistered renderer', () => {
@@ -94,7 +96,9 @@ describe('validateStory', () => {
           : chapter,
       ),
     } satisfies StoryConfig;
-    expect(validateStory(bad, assetsManifest, baseOptions).some((i) => i.code === 'CLIP_UNKNOWN')).toBe(true);
+    expect(
+      validateStory(bad, assetsManifest, baseOptions).some((i) => i.code === 'CLIP_UNKNOWN'),
+    ).toBe(true);
   });
 
   it('rejects transition clip that does not exist', () => {
@@ -112,7 +116,11 @@ describe('validateStory', () => {
                         transition: {
                           kind: 'burn' as const,
                           from: { asset: 'act-1-origin', clip: 'missing', frame: 'last' as const },
-                          to: { asset: 'act-1-origin', clip: '007-go-home', frame: 'first' as const },
+                          to: {
+                            asset: 'act-1-origin',
+                            clip: '007-go-home',
+                            frame: 'first' as const,
+                          },
                         },
                       },
                     }
@@ -122,9 +130,9 @@ describe('validateStory', () => {
           : chapter,
       ),
     } satisfies StoryConfig;
-    expect(validateStory(bad, assetsManifest, baseOptions).some((i) => i.code === 'TRANSITION_CLIP')).toBe(
-      true,
-    );
+    expect(
+      validateStory(bad, assetsManifest, baseOptions).some((i) => i.code === 'TRANSITION_CLIP'),
+    ).toBe(true);
   });
 });
 

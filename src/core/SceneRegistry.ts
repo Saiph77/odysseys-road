@@ -14,8 +14,7 @@ function sceneOpacity(scene: SceneDefinition, road: number): number {
   }
   const localRoad = road - scene.road.start;
   const fadeIn = scene.blend.in > 0 ? smoothstep(0, scene.blend.in, localRoad) : 1;
-  const fadeOut =
-    scene.blend.out > 0 ? 1 - smoothstep(span - scene.blend.out, span, localRoad) : 1;
+  const fadeOut = scene.blend.out > 0 ? 1 - smoothstep(span - scene.blend.out, span, localRoad) : 1;
   return clamp01(fadeIn * fadeOut);
 }
 

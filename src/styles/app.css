@@ -33,6 +33,45 @@ body {
   inset: 0;
 }
 
+.sequence-canvas,
+.boot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.boot {
+  filter: blur(2px);
+}
+
+.boot-hint {
+  position: absolute;
+  bottom: 18vh;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+  text-shadow: 0 2px 8px #000;
+}
+
+.boot-hint[hidden] {
+  display: none;
+}
+
+.dom-scene[data-variant='title'] .dom-scene__line:first-child {
+  font-family: 'Songti SC', 'Noto Serif CJK SC', serif;
+  font-size: clamp(3rem, 8vw, 8rem);
+  letter-spacing: 0.3em;
+}
+
+.dom-scene[data-variant='title'] .dom-scene__line:last-child {
+  font-size: 0.85rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+}
+
 .renderer-layer {
   position: absolute;
   inset: 0;
@@ -88,14 +127,22 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.25);
   background: rgba(0, 0, 0, 0.45);
   color: inherit;
-  padding: 0.35rem 0.6rem;
-  font: inherit;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 0;
   cursor: pointer;
 }
 
 .chapter-nav button.is-active {
   border-color: #fff;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.chapter-nav button:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 5px;
 }
 
 .dev-road-panel {

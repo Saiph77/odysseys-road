@@ -6,8 +6,11 @@ import { StorySession } from '../core/StorySession';
 import { assertValidStory } from '../core/validateStory';
 import { DevRoadPanel, ChapterNav } from '../components/DevRoadPanel';
 import { RendererStage } from '../components/RendererStage';
+import { BootHint } from '../components/BootHint';
 import { DomRenderer } from '../renderers/DomRenderer';
-import { SequencePlaceholder } from '../renderers/SequencePlaceholder';
+import { FrameStore } from '../renderers/sequence/FrameStore';
+import { renderingCapabilities } from '../capabilities/webgl';
+import { sequenceFactory } from '../renderers/rendererRegistry';
 import {
   NullAudioBus,
   registerRenderer,
@@ -15,7 +18,10 @@ import {
 } from '../renderers/rendererRegistry';
 
 registerRenderer('dom', () => new DomRenderer());
-registerRenderer('sequence', () => new SequencePlaceholder());
+const capabilities = renderingCapabilities();
+const frames = new FrameStore();
+registerRenderer('sequence', () => sequenceFactory(frames, capabilities));
+if (import.meta.hot) import.meta.hot.dispose(() => frames.destroy());
 assertValidStory(storyConfig, assetsManifest, { registeredRenderers: getRegisteredRendererKeys() });
 
 const debugMode = new URLSearchParams(window.location.search).get('debug') === '1';
@@ -41,7 +47,7 @@ export function App() {
       content: contentRegistry,
       latch: session.runtime.latch,
       audio: new NullAudioBus(),
-      reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      reducedMotion: capabilities.reducedMotion,
     }),
     [session],
   );
@@ -63,7 +69,9 @@ export function App() {
   return (
     <>
       <div className="viewport">
+        <img className="boot" src={assetsManifest.assets[0].poster} alt="" decoding="async" />
         <RendererStage session={session} context={context} />
+        <BootHint session={session} />
         <ChapterNav
           config={storyConfig}
           activeChapterId={chapter}
