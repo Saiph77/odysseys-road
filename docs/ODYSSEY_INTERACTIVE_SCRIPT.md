@@ -541,9 +541,9 @@ Track 结尾：黑色墨水被海水从中央冲开，船回到统一海上中�
 > 不要寻找没有代价的航线。  
 > 这里不存在那样的路。
 
-#### 选择
+#### 探视
 
-交互：用户可以控制船舵。界面没有“正确方向”提示；越远离漩涡，斯库拉的六道阴影越明显。
+交互：用户不能改变已经发生的航线。向左探头，漩涡的尺度、扭曲与低频变得清晰；向右探头，峭壁薄雾退开，斯库拉的六道阴影逐渐显现。船始终沿唯一叙事序列前进，头部、鼠标或键盘只改变视窗、显影与声音。
 
 旁白：
 
@@ -816,7 +816,7 @@ Odysseus bound tightly to the mast of the same longship, body straining toward d
 ### Prompt 3.2：斯库拉与卡律布狄斯
 
 ```text
-The same damaged longship forced through a narrow channel, a colossal spiral whirlpool opening on the left and a vertical white cliff on the right where six long shadowed necks of Scylla descend toward exactly six sailors. Odysseus grips the steering oar and looks toward the men he knows he cannot save. The image captures the moral geometry clearly: total destruction on one side, six individual losses on the other. Six small stars above the crew are beginning to extinguish, no gore, no chaotic fantasy-monster clutter.
+The same damaged longship follows one fixed central course through a narrow channel, with a colossal spiral whirlpool occupying the outer-left third and a vertical white cliff occupying the outer-right third, where six long shadowed necks of Scylla descend toward exactly six sailors. Odysseus grips the steering oar and looks toward the men he knows he cannot save. Compose both dangers in the same 16:9 master image, keep the ship and all irreversible action inside the central safe area, and leave controlled visual breathing room near both horizontal edges for subtle viewport peeking. The moral geometry must remain legible under a small left or right crop: total destruction on one side, six individual losses on the other. Six small stars above the crew are beginning to extinguish, no gore, no chaotic fantasy-monster clutter.
 ```
 
 ### Prompt 3.3：太阳神的牛
