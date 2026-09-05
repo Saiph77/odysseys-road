@@ -1,0 +1,11 @@
+{
+  "fps": 24,
+  "assets": [
+    {"id":"act-1-origin","start":5.4,"end":35,"clips":{"002-sea-raft":[5.4,11],"003-006-memory":[11,30],"006-troy-fire":[24,30],"007-go-home":[30,35]}},
+    {"id":"act-2-ithaca","start":37.8,"end":81.6,"allowDarkLast":true,"clips":{"009-015":[37.8,77],"015-shore-search":[75,77],"016-red-sail-first":[77,79],"017-helmet":[79,81.6]}},
+    {"id":"act-3a-launch","start":82,"end":88.4,"clips":{"full":[82,88.4]}},
+    {"id":"act-3a-trials","start":90.25,"end":122,"clips":{"020-forest-mist":[90.25,94],"021-silver-giant":[94,98],"022-palace-intrigue":[98,102],"023-storm-sea":[102,106],"024-mist-entity":[106,108],"025-mystery-woman":[108,110],"026-fire-battle":[110,112],"027-injured-youth":[112,115],"028-kiss-animal":[115,117],"029-army-plains":[117,122]}},
+    {"id":"act-3b-homeward","start":122,"end":134.9,"clips":{"030-red-sail-crossing":[122,124],"031-shore-charge":[124,126],"032-cliff-run":[126,128],"033-ocean-wide":[128,130],"034-oars-rock":[130,131],"035-city-fire-charge":[131,131.65],"036-beach-landing":[131.65,132.33],"037-climb-red-sail":[132.33,133.25],"038-statue-fire":[133.25,134.9]}},
+    {"id":"act-4-stinger","start":138.1,"end":142.2,"clips":{"040-cyclops-setup":[138.1,140.6],"041-cyclops-hand":[140.6,142.2]}}
+  ]
+}

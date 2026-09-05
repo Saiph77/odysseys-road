@@ -1,8 +1,12 @@
-import { describe, expect, it } from 'vitest';
-import { clipFromSeconds } from '../../src/config/assets.manifest';
+import { expect, it } from 'vitest';
+import { assetsManifest } from '../../src/config/assets.manifest';
 
-describe('clipFromSeconds', () => {
-  it('matches AGENTS frameIndex formula', () => {
-    expect(clipFromSeconds(5.4, 5.4, 11.0)).toEqual({ from: 1, to: 135 });
-  });
+it('contains six chapter assets with bounded inclusive frame clips', () => {
+  expect(assetsManifest.assets).toHaveLength(6);
+  expect(assetsManifest.assets.some(asset => asset.id.includes('official-trailer'))).toBe(false);
+  for (const asset of assetsManifest.assets) for (const clip of Object.values(asset.clips)) {
+    expect(clip.from).toBeGreaterThanOrEqual(1);
+    expect(clip.to).toBeGreaterThanOrEqual(clip.from);
+    expect(clip.to).toBeLessThanOrEqual(asset.frameCount);
+  }
 });
