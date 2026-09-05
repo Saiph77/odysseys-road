@@ -16,8 +16,13 @@ describe('ScrollProgressSource', () => {
     browser = Object.assign(new EventTarget(), {
       innerHeight: 720,
       scrollY: 0,
-      requestAnimationFrame: vi.fn((callback: FrameRequestCallback) => { scheduled = callback; return 1; }),
-      cancelAnimationFrame: vi.fn(() => { scheduled = null; }),
+      requestAnimationFrame: vi.fn((callback: FrameRequestCallback) => {
+        scheduled = callback;
+        return 1;
+      }),
+      cancelAnimationFrame: vi.fn(() => {
+        scheduled = null;
+      }),
       scrollTo: vi.fn(),
     });
     vi.stubGlobal('window', browser);
@@ -66,7 +71,11 @@ describe('ScrollProgressSource', () => {
     source.stop();
   });
 
-  it.each([[-1, 0], [0.5, 14040], [2, 28080]])('seeks through the inverse mapping: %s', (progress, top) => {
+  it.each([
+    [-1, 0],
+    [0.5, 14040],
+    [2, 28080],
+  ])('seeks through the inverse mapping: %s', (progress, top) => {
     scrollToProgress(progress);
     expect(browser.scrollTo).toHaveBeenCalledWith({ top, behavior: 'auto' });
   });
@@ -74,7 +83,9 @@ describe('ScrollProgressSource', () => {
   it('preserves exact seek intent across CSS pixel quantization, then resumes real scrolling', () => {
     vi.stubGlobal('document', { querySelector: () => ({ scrollHeight: 26182 }) });
     browser.innerHeight = 654;
-    browser.scrollTo.mockImplementation(({ top }: { top: number }) => { browser.scrollY = top - 0.02; });
+    browser.scrollTo.mockImplementation(({ top }: { top: number }) => {
+      browser.scrollY = top - 0.02;
+    });
     const publish = vi.fn();
     const source = new ScrollProgressSource();
     source.start(publish);

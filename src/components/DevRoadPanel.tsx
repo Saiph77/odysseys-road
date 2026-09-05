@@ -43,10 +43,15 @@ export function DevRoadPanel({
         </div>
         <div>
           <dt>frameIndex（占位预估）</dt>
-          <dd>{frame.activeScenes.filter((scene) => scene.renderer === 'sequence').map((scene) => {
-            const frameIndex = plannedFrameIndex(scene, manifest);
-            return `${scene.sceneId}: ${frameIndex ?? 'transition'}`;
-          }).join(', ') || '—'}</dd>
+          <dd>
+            {frame.activeScenes
+              .filter((scene) => scene.renderer === 'sequence')
+              .map((scene) => {
+                const frameIndex = plannedFrameIndex(scene, manifest);
+                return `${scene.sceneId}: ${frameIndex ?? 'transition'}`;
+              })
+              .join(', ') || '—'}
+          </dd>
         </div>
       </dl>
 

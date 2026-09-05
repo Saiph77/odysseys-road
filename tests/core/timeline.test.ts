@@ -24,7 +24,10 @@ describe('chapter boundaries and inverse seek', () => {
     for (const fraction of [0, 0.1, 0.5, 0.9, 0.999]) {
       const road = fraction * chapter.timeline.end;
       const mapped = progressForChapterRoad(storyConfig, chapter.id, road);
-      const result = director.fromProgress(mapScrollProgress(rawProgressFromMapped(mapped)), 'debug');
+      const result = director.fromProgress(
+        mapScrollProgress(rawProgressFromMapped(mapped)),
+        'debug',
+      );
       expect(result.chapterId).toBe(chapter.id);
       expect(result.road).toBeCloseTo(road, 8);
       expect(result.source).toBe('debug');
@@ -42,9 +45,13 @@ describe('chapter boundaries and inverse seek', () => {
 
 describe('SceneRegistry interval ownership and opacity', () => {
   it.each(storyConfig.chapters)('has no double sequence at hard cuts in $id', (chapter) => {
-    const sequences = chapter.scenes.filter((scene) => scene.renderer === 'sequence' && scene.layer === 10);
+    const sequences = chapter.scenes.filter(
+      (scene) => scene.renderer === 'sequence' && scene.layer === 10,
+    );
     for (const scene of sequences) {
-      const active = resolveActiveScenes(chapter, scene.road.start).filter((frame) => frame.layer === 10);
+      const active = resolveActiveScenes(chapter, scene.road.start).filter(
+        (frame) => frame.layer === 10,
+      );
       expect(active.map((frame) => frame.sceneId)).toEqual([scene.id]);
     }
   });
@@ -57,22 +64,39 @@ describe('SceneRegistry interval ownership and opacity', () => {
     expect(after.map((scene) => scene.sceneId)).not.toContain('origin-memory');
     expect(after.map((scene) => scene.sceneId)).toContain('origin-alone');
     expect(after.find((scene) => scene.sceneId === 'origin-burn')?.opacity).toBe(1);
-    expect(resolveActiveScenes(origin, 600).map((scene) => scene.sceneId)).not.toContain('origin-burn');
+    expect(resolveActiveScenes(origin, 600).map((scene) => scene.sceneId)).not.toContain(
+      'origin-burn',
+    );
   });
 
   const fixture: ChapterDefinition = {
-    id: 'blend-fixture', kind: 'linear', timeline: { start: 0, end: 100 }, scroll: { screens: 1 },
-    scenes: [{
-      id: 'blend-scene', road: { start: 0, end: 100 }, blend: { in: 20, out: 20 }, layer: 10, renderer: 'dom',
-    }],
+    id: 'blend-fixture',
+    kind: 'linear',
+    timeline: { start: 0, end: 100 },
+    scroll: { screens: 1 },
+    scenes: [
+      {
+        id: 'blend-scene',
+        road: { start: 0, end: 100 },
+        blend: { in: 20, out: 20 },
+        layer: 10,
+        renderer: 'dom',
+      },
+    ],
   };
 
-  it.each([[5, 0.15625], [10, 0.5], [20, 1], [50, 1], [80, 1], [90, 0.5], [95, 0.15625]])(
-    'uses reversible smoothstep at Road %s', (road, opacity) => {
-      expect(resolveActiveScenes(fixture, road)[0].opacity).toBeCloseTo(opacity);
-      expect(resolveActiveScenes(fixture, 100 - road)[0].opacity).toBeCloseTo(opacity);
-    },
-  );
+  it.each([
+    [5, 0.15625],
+    [10, 0.5],
+    [20, 1],
+    [50, 1],
+    [80, 1],
+    [90, 0.5],
+    [95, 0.15625],
+  ])('uses reversible smoothstep at Road %s', (road, opacity) => {
+    expect(resolveActiveScenes(fixture, road)[0].opacity).toBeCloseTo(opacity);
+    expect(resolveActiveScenes(fixture, 100 - road)[0].opacity).toBeCloseTo(opacity);
+  });
 
   it('omits fully transparent and out-of-range scenes', () => {
     for (const road of [-1, 0, 100, 101]) expect(resolveActiveScenes(fixture, road)).toEqual([]);
