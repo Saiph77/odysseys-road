@@ -7,6 +7,7 @@
 ## 当前材料
 
 - [60 秒路演版设计（当前第一版制作基准）](docs/ROADSHOW_60S_CUT.md)
+- [60 秒连续剧本（开场、择路、Track 3 与归乡）](docs/scripts/60s-roadshow/README.md)
 - [目标架构与开发规范](docs/ARCHITECTURE.md)
 - [Track 空间选择技术设计](docs/TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md)
 - [单序列头部探视技术路线](docs/HEAD_COUPLED_PEEK_TECHNICAL_DESIGN.md)
@@ -14,6 +15,7 @@
 - [17 组双语独立图像 Prompt](prompts/image-prompts/README.md)
 - [双语独立 System Prompt 设计](docs/PROMPT_SYSTEM_DESIGN.md)
 - [Pear-no 类项目架构审计](docs/reference/PEAR_ARCHITECTURE_AUDIT.md)
+- [Pear 首段视频与复合转场研究](docs/reference/PEAR_HERO_TRANSITION_STUDY.md)
 - [Agent 协作约束](AGENTS.md)
 
 ## 参考实现
@@ -32,7 +34,7 @@
 → 50–60s  雷击沉船 → 伊萨卡
 ```
 
-第一版完整制作 Track 3「歌声与牺牲」。另外两张 Track 卡片保留关注反馈，但明确显示内容尚未完成；摄像头授权、音频解锁和中心校准发生在 60 秒正片开始前。
+第一版完整制作 Track 3「歌声与牺牲」。另外两面 Track 神谕镜保留关注反馈，但明确显示内容尚未完成；摄像头授权、音频解锁和中心校准发生在 60 秒正片开始前。
 
 后续长版的三个 Track：
 
