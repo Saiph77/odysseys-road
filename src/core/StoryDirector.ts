@@ -19,14 +19,13 @@ function buildChapterSlices(config: StoryConfig): ChapterSlice[] {
     if (!chapter) {
       throw new Error(`Unknown chapter in flow.order: ${chapterId}`);
     }
-    const weight = chapter.scroll.screens / totalScreens;
     const slice: ChapterSlice = {
       chapterId,
-      progressStart: accumulated,
-      progressEnd: accumulated + weight,
+      progressStart: accumulated / totalScreens,
+      progressEnd: (accumulated + chapter.scroll.screens) / totalScreens,
       timelineEnd: chapter.timeline.end,
     };
-    accumulated += weight;
+    accumulated += chapter.scroll.screens;
     return slice;
   });
 }

@@ -3,8 +3,8 @@ import { clamp01 } from './validateStory';
 
 const smoothstep = (edge0: number, edge1: number, value: number) => {
   if (edge1 <= edge0) return value >= edge1 ? 1 : 0;
-  const t = clamp01((value - edge0) / (edge1 - edge0));
-  return t * t * (3 - 2 * t);
+  const progress = clamp01((value - edge0) / (edge1 - edge0));
+  return progress * progress * (3 - 2 * progress);
 };
 
 function sceneOpacity(scene: SceneDefinition, road: number): number {
@@ -29,6 +29,7 @@ export function resolveActiveScenes(chapter: ChapterDefinition, road: number): S
   const frames: SceneFrame[] = [];
 
   for (const scene of chapter.scenes) {
+    if (road === scene.road.end && road !== chapter.timeline.end) continue;
     const opacity = sceneOpacity(scene, road);
     if (opacity <= 0) continue;
     frames.push({
@@ -43,7 +44,7 @@ export function resolveActiveScenes(chapter: ChapterDefinition, road: number): S
     });
   }
 
-  return frames.sort((a, b) => a.layer - b.layer);
+  return frames.sort((first, second) => first.layer - second.layer);
 }
 
 export class SceneRegistry {
