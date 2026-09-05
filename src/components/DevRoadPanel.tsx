@@ -1,16 +1,18 @@
 import { useMemo, useState } from 'react';
-import type { DirectorFrame, StoryConfig } from '../core/contracts';
+import type { AssetManifest, DirectorFrame, StoryConfig } from '../core/contracts';
 import { progressForChapterRoad } from '../core/StoryDirector';
-import { scrollToProgress } from '../core/ProgressSource';
+import { plannedFrameIndex } from '../core/frameIndex';
 
 export function DevRoadPanel({
   config,
   frame,
   onSeek,
+  manifest,
 }: {
   config: StoryConfig;
   frame: DirectorFrame;
   onSeek: (progress: number) => void;
+  manifest: AssetManifest;
 }) {
   const [dragging, setDragging] = useState(false);
   const chapters = useMemo(() => config.flow.order ?? [], [config.flow.order]);
@@ -39,6 +41,13 @@ export function DevRoadPanel({
           <dt>activeScenes</dt>
           <dd>{frame.activeScenes.map((scene) => scene.sceneId).join(', ') || '—'}</dd>
         </div>
+        <div>
+          <dt>frameIndex（占位预估）</dt>
+          <dd>{frame.activeScenes.filter((scene) => scene.renderer === 'sequence').map((scene) => {
+            const frameIndex = plannedFrameIndex(scene, manifest);
+            return `${scene.sceneId}: ${frameIndex ?? 'transition'}`;
+          }).join(', ') || '—'}</dd>
+        </div>
       </dl>
 
       <label className="dev-road-panel__slider">
@@ -46,14 +55,14 @@ export function DevRoadPanel({
         <input
           type="range"
           min={0}
-          max={1000}
-          value={Math.round(globalProgress * 1000)}
+          max={1}
+          step="any"
+          value={globalProgress}
           onPointerDown={() => setDragging(true)}
           onPointerUp={() => setDragging(false)}
           onChange={(event) => {
-            const next = Number(event.target.value) / 1000;
+            const next = Number(event.target.value);
             onSeek(next);
-            scrollToProgress(next);
           }}
         />
       </label>
@@ -67,7 +76,6 @@ export function DevRoadPanel({
             onClick={() => {
               const progress = progressForChapterRoad(config, chapterId, 0);
               onSeek(progress);
-              scrollToProgress(progress);
             }}
           >
             {chapterId}

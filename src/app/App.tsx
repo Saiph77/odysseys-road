@@ -78,7 +78,7 @@ export function App() {
       </div>
       <div className="stage" style={{ height: `${totalScreens * 100}vh` }} />
       {debugMode ? (
-        <DevRoadPanel config={storyConfig} frame={frame} onSeek={seekToProgress} />
+        <DevRoadPanel config={storyConfig} frame={frame} onSeek={seekToProgress} manifest={assetsManifest} />
       ) : null}
     </>
   );
