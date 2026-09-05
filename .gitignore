@@ -7,3 +7,8 @@ dist/
 .env.*
 !.env.example
 
+# Generated sequence frames (keep manifest + docs in git)
+public/assets/sequences/**/desktop/
+public/assets/video/*.mp4
+archive/**/assets/**/desktop/
+
