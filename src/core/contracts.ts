@@ -50,7 +50,7 @@ export type SceneDefinition = Readonly<{
   renderer: SceneRendererKey;
   asset?: string;
   clip?: string;
-  behavior?: SceneBehavior;
+  behavior?: Readonly<Record<string, unknown>>;
 }>;
 
 export type ChapterKind = 'linear' | 'hub' | 'track' | 'finale' | 'placeholder';
@@ -101,7 +101,7 @@ export type SceneFrame = Readonly<{
   layer: number;
   asset?: string;
   clip?: string;
-  behavior?: SceneBehavior;
+  behavior?: Readonly<Record<string, unknown>>;
 }>;
 
 export type DirectorFrame = Readonly<{
@@ -143,6 +143,7 @@ export type AssetClip = Readonly<{
 export type AssetManifestEntry = Readonly<{
   id: string;
   path: string;
+  pattern?: string;
   frameCount: number;
   fps: number;
   width: number;
