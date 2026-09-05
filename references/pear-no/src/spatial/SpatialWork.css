@@ -1,0 +1,258 @@
+.spatial-integrated .pf-fix { opacity: 0 !important; }
+
+.spatial-work {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  color: #fff;
+}
+
+.spatial-work__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transition: opacity .25s linear;
+}
+.spatial-work__canvas canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.spatial-source-host {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: 768px;
+  pointer-events: none;
+}
+
+.spatial-source {
+  box-sizing: border-box;
+  width: 768px;
+  height: 1680px;
+  padding: 48px 54px 46px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 2px solid #17385d;
+  background: #eadab4;
+  color: #13365e;
+  font-family: "GT Standard L", "Helvetica Neue", sans-serif;
+}
+
+.spatial-source__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 15px;
+  border-top: 3px solid currentColor;
+  font-family: "GT Standard Mono", monospace;
+  font-size: 14px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.spatial-source__hero { margin-top: 205px; }
+.spatial-source__index {
+  display: block;
+  margin-bottom: 28px;
+  font-family: "GT Standard Mono", monospace;
+  font-size: 14px;
+  letter-spacing: .16em;
+}
+.spatial-source__hero h2 {
+  margin: 0;
+  font: 300 76px/.88 "Flecha M", "Flecha S", Georgia, serif;
+  letter-spacing: -.045em;
+}
+.spatial-source__hero h2 span { display: block; }
+.spatial-source__hero > p {
+  width: 76%;
+  margin: 42px 0 0 auto;
+  font: 400 25px/1.2 "Flecha S", Georgia, serif;
+}
+
+.spatial-source__section {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 28px;
+  margin-top: 180px;
+  padding-top: 26px;
+  border-top: 1px solid currentColor;
+}
+.spatial-source__section > span {
+  font-family: "GT Standard Mono", monospace;
+  font-size: 13px;
+}
+.spatial-source__section h3 {
+  margin: 0 0 24px;
+  font: 300 41px/1 "Flecha S", Georgia, serif;
+  letter-spacing: -.025em;
+}
+.spatial-source__section p {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.38;
+}
+
+.spatial-source blockquote {
+  margin: 170px 0 160px;
+  padding: 42px 0 46px;
+  border-top: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  font: 300 48px/1.02 "Flecha M", "Flecha S", Georgia, serif;
+  letter-spacing: -.035em;
+}
+.spatial-source__section--last { margin-top: 0; }
+.spatial-source footer {
+  margin-top: auto;
+  padding-bottom: 14px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  border-bottom: 3px solid currentColor;
+  font-family: "GT Standard Mono", monospace;
+  font-size: 13px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.spatial-source footer b {
+  font: 300 39px/1 "Flecha M", Georgia, serif;
+  letter-spacing: -.04em;
+}
+
+.spatial-work__video {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.spatial-view-control {
+  position: fixed;
+  z-index: 18;
+  top: calc(var(--h1) + 14px);
+  right: 2%;
+  width: 184px;
+  padding: 11px 12px 10px;
+  border: 1px solid rgb(255 255 255 / .28);
+  background: rgb(7 22 43 / .72);
+  backdrop-filter: blur(16px);
+  pointer-events: auto;
+  transition: opacity .35s, color .35s, border-color .35s, background .35s;
+}
+.spatial-view-control > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font: 400 8px/1 "GT Standard Mono", monospace;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.spatial-view-control > span i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .42;
+}
+.spatial-view-control > span i.is-live {
+  opacity: 1;
+  box-shadow: 0 0 0 3px rgb(255 255 255 / .14);
+}
+.spatial-view-control button {
+  width: 100%;
+  margin-top: 9px;
+  padding: 8px 7px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: 400 8px/1 "GT Standard Mono", monospace;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.spatial-view-control button:hover { background: rgb(255 255 255 / .12); }
+.spatial-view-control button:disabled { opacity: .5; cursor: wait; }
+.spatial-view-control small {
+  display: block;
+  margin-top: 8px;
+  opacity: .56;
+  font: 400 7px/1.25 "GT Standard Mono", monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.spatial-work--light .spatial-view-control {
+  color: #1d1c19;
+  border-color: rgb(29 28 25 / .25);
+  background: rgb(242 241 237 / .74);
+}
+
+.spatial-focus-readout {
+  position: fixed;
+  z-index: 10;
+  right: 2%;
+  bottom: 3.2%;
+  width: 210px;
+  color: #fff;
+  text-align: right;
+  transition: opacity .2s linear;
+}
+.spatial-focus-readout > span {
+  display: block;
+  font: 400 8px/1 "GT Standard Mono", monospace;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.spatial-focus-readout strong {
+  display: block;
+  margin-top: 5px;
+  font: 300 32px/.92 "Flecha M", Georgia, serif;
+  letter-spacing: -.03em;
+}
+.spatial-focus-readout > i {
+  display: block;
+  height: 1px;
+  margin-top: 9px;
+  background: rgb(255 255 255 / .25);
+  overflow: hidden;
+}
+.spatial-focus-readout > i b {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  transform-origin: left;
+}
+.spatial-focus-readout small {
+  display: block;
+  margin-top: 7px;
+  opacity: .58;
+  font: 400 7px/1 "GT Standard Mono", monospace;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 820px) {
+  .spatial-view-control {
+    top: 72px;
+    right: 14px;
+    width: 154px;
+  }
+  .spatial-focus-readout {
+    right: 16px;
+    bottom: 18px;
+    width: 170px;
+  }
+  .spatial-focus-readout strong { font-size: 25px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spatial-work__canvas,
+  .spatial-focus-readout { transition: none; }
+}
