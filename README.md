@@ -11,6 +11,7 @@
 - [Track 空间选择技术设计](docs/TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md)
 - [单序列头部探视技术路线](docs/HEAD_COUPLED_PEEK_TECHNICAL_DESIGN.md)
 - [完整互动剧本（后续长版蓝图）](docs/ODYSSEY_INTERACTIVE_SCRIPT.md)
+- [17 组双语独立图像 Prompt](prompts/image-prompts/README.md)
 - [双语独立 System Prompt 设计](docs/PROMPT_SYSTEM_DESIGN.md)
 - [Pear-no 类项目架构审计](docs/reference/PEAR_ARCHITECTURE_AUDIT.md)
 - [Agent 协作约束](AGENTS.md)
