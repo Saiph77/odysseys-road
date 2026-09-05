@@ -1,12 +1,12 @@
 # 《归航 / NOSTOS》目标架构与开发规范
 
 > [Rebuilt by dev-trace init: 2026-09-05 from fresh repository scan]
-> 状态：设计已收敛，按 `docs/TASKS.md` 进入 MVP 实现
-> 范围：滚动叙事运行时、分支章节路由、多渲染层、神谕镜（DOM/CSS 3D，预留 HTML-in-Canvas + Three.js）、MediaPipe、素材与 Prompt 管理
-> 决策来源：`docs/DECISIONS.md`（与本文冲突时以它为准）
-> 权威材料：`docs/scripts/60s-roadshow/`、`docs/TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md`、`references/pear-no/src/`
-> 姊妹文档：`docs/TASKS.md`、`docs/PROMPT_SYSTEM_DESIGN.md`、`docs/reference/PEAR_ARCHITECTURE_AUDIT.md`
-> 更新日期：2026-09-05（V2：吸收 D-001…D-016）
+> 状态：**V2 重新设计** — 叙事章节与 story.config 内容待新大纲；**模块边界与契约模式仍有效**
+> 范围：滚动叙事运行时、分支章节路由、多渲染层、MediaPipe、序列/视频素材管线
+> V1 决策与任务卡：见 `archive/v1-60s-ai-roadshow/docs/`
+> 活跃入口：`docs/REDESIGN.md`、`docs/README.md`
+> 技术参考：`docs/TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md`、`references/pear-no/src/`
+> 更新日期：2026-09-05（V2 归档后）
 
 ## 0. 阅读地图
 

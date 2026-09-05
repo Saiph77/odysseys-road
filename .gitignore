@@ -2,6 +2,7 @@
 node_modules/
 dist/
 .vite/
+*.tsbuildinfo
 *.log
 .env
 .env.*
@@ -12,3 +13,8 @@ public/assets/sequences/**/desktop/
 public/assets/video/*.mp4
 archive/**/assets/**/desktop/
 
+# Local acceptance outputs and cloud-transfer media (not source control)
+/artifacts/
+/test-results/
+/playwright-report/
+/handoff-assets/

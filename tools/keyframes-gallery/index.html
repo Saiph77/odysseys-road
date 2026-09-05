@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trailer keyframes · validation</title>
+  <style>
+    :root { color-scheme: dark; --bg: #0a0c10; --fg: #e8ecf4; --muted: #8b95a8; --accent: #c9a962; }
+    * { box-sizing: border-box; margin: 0; }
+    body { background: var(--bg); color: var(--fg); font: 14px/1.5 system-ui, sans-serif; padding: 24px; }
+    h1 { font-size: 20px; margin-bottom: 8px; color: var(--accent); }
+    p { color: var(--muted); margin-bottom: 24px; }
+    .act { margin-bottom: 32px; }
+    .act h2 { font-size: 15px; margin-bottom: 12px; border-bottom: 1px solid #222; padding-bottom: 6px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    figure { background: #111; border-radius: 8px; overflow: hidden; border: 1px solid #222; }
+    figure img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; cursor: pointer; }
+    figcaption { padding: 10px 12px; font-size: 12px; }
+    figcaption strong { display: block; color: var(--fg); margin-bottom: 4px; }
+    .tags { color: var(--muted); }
+    .note { color: #d4a574; font-size: 11px; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Official trailer · 43 keyframes</h1>
+  <p>按四幕大纲抽帧校验 · 数据源 <code>timeline.json</code></p>
+  <div id="root"></div>
+  <script type="module">
+    const root = document.getElementById('root');
+    const res = await fetch('../../public/assets/keyframes/official-trailer/index.json');
+    const data = await res.json();
+    const acts = [1, 2, 3, 4];
+    const labels = { 1: '第一幕 · 海难与归乡欲望', 2: '第二幕 · 伊萨卡', 3: '第三幕 · 神话试炼蒙太奇', 4: '第四幕 · 片名与巨人' };
+
+    for (const act of acts) {
+      const section = document.createElement('section');
+      section.className = 'act';
+      section.innerHTML = `<h2>${labels[act]}</h2><div class="grid"></div>`;
+      const grid = section.querySelector('.grid');
+      data.frames.filter(f => f.act === act).forEach(f => {
+        const fig = document.createElement('figure');
+        const imgPath = `../../public/assets/keyframes/official-trailer/frames/${f.file}`;
+        fig.innerHTML = `
+          <img src="${imgPath}" alt="${f.label}" loading="lazy" />
+          <figcaption>
+            <strong>${f.range || ''} · ${f.label}</strong>
+            <span class="tags">${(f.tags || []).join(' · ')}</span>
+            ${f.note ? `<div class="note">${f.note}</div>` : ''}
+          </figcaption>`;
+        fig.querySelector('img').onclick = () => window.open(imgPath, '_blank');
+        grid.appendChild(fig);
+      });
+      root.appendChild(section);
+    }
+  </script>
+</body>
+</html>

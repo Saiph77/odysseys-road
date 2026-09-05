@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>编排预览 · THE ODYSSEY</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0c10;
+      --panel: #12151c;
+      --border: #252a35;
+      --fg: #e8ecf4;
+      --muted: #8b95a8;
+      --accent: #c9a962;
+      --accent-dim: rgba(201, 169, 98, 0.15);
+      --ok: #7dd3a0;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font: 14px/1.5 system-ui, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    header h1 { font-size: 15px; color: var(--accent); font-weight: 600; }
+    .status { font-size: 12px; color: var(--muted); }
+    .status.saved { color: var(--ok); }
+    main { flex: 1; display: grid; grid-template-columns: 280px 1fr 320px; min-height: 0; }
+    .sidebar {
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      background: var(--panel);
+    }
+    .act { border-bottom: 1px solid var(--border); }
+    .act-head {
+      padding: 10px 12px;
+      background: #0e1016;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .act-head button {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .act-head button:hover { border-color: var(--accent); color: var(--accent); }
+    .beat {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 8px 12px;
+      border: none;
+      border-bottom: 1px solid #1a1e28;
+      background: transparent;
+      color: var(--fg);
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .beat:hover { background: #181c24; }
+    .beat.active { background: var(--accent-dim); border-left: 3px solid var(--accent); }
+    .beat.has-comment::after { content: ' ·'; color: var(--ok); }
+    .beat-id { color: var(--muted); font-size: 10px; display: block; }
+    .beat-range { color: var(--muted); font-size: 11px; }
+    .center {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: #000;
+    }
+    video {
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+      background: #000;
+      object-fit: contain;
+    }
+    .controls {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      background: var(--panel);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      font-size: 12px;
+    }
+    .controls label { display: flex; align-items: center; gap: 6px; color: var(--muted); cursor: pointer; }
+    .controls button {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #1a1e28;
+      color: var(--fg);
+      cursor: pointer;
+    }
+    .controls button:hover { border-color: var(--accent); }
+    .detail {
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 14px;
+      background: var(--panel);
+    }
+    .detail h2 { font-size: 14px; margin-bottom: 4px; }
+    .detail .meta { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+    .thumb {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #000;
+      margin-bottom: 12px;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #1a1e28;
+      color: var(--muted);
+    }
+    fieldset {
+      border: none;
+      margin-bottom: 12px;
+    }
+    fieldset label {
+      display: block;
+      font-size: 11px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 72px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #0a0c10;
+      color: var(--fg);
+      font: inherit;
+      resize: vertical;
+    }
+    textarea:focus { outline: none; border-color: var(--accent); }
+    .note { font-size: 11px; color: #d4a574; margin-top: 8px; }
+    .empty { color: var(--muted); padding: 24px; text-align: center; }
+    @media (max-width: 960px) {
+      main { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
+      .sidebar { max-height: 180px; border-right: none; border-bottom: 1px solid var(--border); }
+      .detail { border-left: none; border-top: 1px solid var(--border); max-height: 240px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>编排预览 · 四幕 × 43 节拍</h1>
+    <span class="status" id="save-status">加载中…</span>
+  </header>
+  <main>
+    <nav class="sidebar" id="nav"></nav>
+    <section class="center">
+      <video id="video" src="/public/assets/video/official-trailer.mp4" preload="metadata" playsinline></video>
+      <div class="controls">
+        <button type="button" id="btn-play">播放片段</button>
+        <button type="button" id="btn-pause">暂停</button>
+        <label><input type="checkbox" id="loop-segment" checked /> 循环片段区间</label>
+        <label><input type="checkbox" id="auto-play" checked /> 跳转后播放</label>
+        <span id="time-display" style="color:var(--muted)">—</span>
+      </div>
+    </section>
+    <aside class="detail" id="detail">
+      <p class="empty">← 选择左侧节拍预览并写 comment</p>
+    </aside>
+  </main>
+
+  <script type="module">
+    const ACT_META = {
+      1: { title: '第一幕 · 海难与归乡', range: [0, 35] },
+      2: { title: '第二幕 · 伊萨卡', range: [35, 84] },
+      3: { title: '第三幕 · 神话试炼', range: [84, 135] },
+      4: { title: '第四幕 · 片名与 stinger', range: [135, 146.75] },
+    };
+
+    function parseRange(range) {
+      const [a, b] = range.split('-').map((part) => {
+        const [m, s] = part.trim().split(':').map(Number);
+        return m * 60 + s;
+      });
+      return { start: a, end: b };
+    }
+
+    function formatClock(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m}:${s.toFixed(1).padStart(4, '0')}`;
+    }
+
+    const nav = document.getElementById('nav');
+    const detail = document.getElementById('detail');
+    const video = document.getElementById('video');
+    const saveStatus = document.getElementById('save-status');
+    const timeDisplay = document.getElementById('time-display');
+    const loopSegment = document.getElementById('loop-segment');
+    const autoPlay = document.getElementById('auto-play');
+
+    let beats = [];
+    let frameFiles = {};
+    let comments = { version: 1, beats: {} };
+    let current = null;
+    let segment = { start: 0, end: 0 };
+    let saveTimer = null;
+
+    async function loadData() {
+      const [timeline, index, commentsRes] = await Promise.all([
+        fetch('/public/assets/keyframes/official-trailer/timeline.json').then((r) => r.json()),
+        fetch('/public/assets/keyframes/official-trailer/index.json').then((r) => r.json()),
+        fetch('/api/comments').then((r) => r.json()),
+      ]);
+      beats = timeline.map((b) => ({ ...b, ...parseRange(b.range) }));
+      index.frames.forEach((f) => { frameFiles[f.id] = f.file; });
+      comments = commentsRes;
+      renderNav();
+      saveStatus.textContent = 'Comment 自动保存到 comments.json';
+    }
+
+    function getBeatComments(id) {
+      if (!comments.beats[id]) {
+        comments.beats[id] = { comment: '', transition: '', orchestration: '' };
+      }
+      return comments.beats[id];
+    }
+
+    function scheduleSave() {
+      clearTimeout(saveTimer);
+      saveStatus.textContent = '保存中…';
+      saveStatus.classList.remove('saved');
+      saveTimer = setTimeout(saveComments, 600);
+    }
+
+    async function saveComments() {
+      try {
+        const res = await fetch('/api/comments', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(comments),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        comments.updatedAt = data.updatedAt;
+        saveStatus.textContent = `已保存 ${new Date(data.updatedAt).toLocaleTimeString()}`;
+        saveStatus.classList.add('saved');
+        updateNavDots();
+      } catch (e) {
+        saveStatus.textContent = `保存失败: ${e.message}`;
+      }
+    }
+
+    function hasAnyComment(id) {
+      const c = comments.beats[id];
+      if (!c) return false;
+      return Boolean(c.comment?.trim() || c.transition?.trim() || c.orchestration?.trim());
+    }
+
+    function renderNav() {
+      nav.innerHTML = '';
+      for (const act of [1, 2, 3, 4]) {
+        const section = document.createElement('div');
+        section.className = 'act';
+        const meta = ACT_META[act];
+        const head = document.createElement('div');
+        head.className = 'act-head';
+        head.innerHTML = `<span>${meta.title}</span>`;
+        const playAct = document.createElement('button');
+        playAct.type = 'button';
+        playAct.textContent = '播整幕';
+        playAct.onclick = () => selectSegment(meta.range[0], meta.range[1], null, meta.range[0]);
+        head.appendChild(playAct);
+        section.appendChild(head);
+
+        beats.filter((b) => b.act === act).forEach((beat) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'beat' + (hasAnyComment(beat.id) ? ' has-comment' : '');
+          btn.dataset.id = beat.id;
+          btn.innerHTML = `
+            <span class="beat-id">${beat.id}</span>
+            ${beat.label}
+            <span class="beat-range">${beat.range}</span>`;
+          btn.onclick = () => selectBeat(beat);
+          section.appendChild(btn);
+        });
+        nav.appendChild(section);
+      }
+    }
+
+    function updateNavDots() {
+      nav.querySelectorAll('.beat').forEach((el) => {
+        el.classList.toggle('has-comment', hasAnyComment(el.dataset.id));
+      });
+    }
+
+    function seekTo(time) {
+      const clamped = Math.max(0, Math.min(time, video.duration || time));
+      return new Promise((resolve) => {
+        const apply = () => {
+          if (Math.abs(video.currentTime - clamped) < 0.04) {
+            resolve(clamped);
+            return;
+          }
+          const done = () => {
+            video.removeEventListener('seeked', done);
+            resolve(video.currentTime);
+          };
+          video.addEventListener('seeked', done, { once: true });
+          video.currentTime = clamped;
+          setTimeout(() => resolve(video.currentTime), 250);
+        };
+        if (video.readyState >= 1) apply();
+        else video.addEventListener('loadedmetadata', apply, { once: true });
+      });
+    }
+
+    function updateTimeDisplay(extra = '') {
+      const now = formatClock(video.currentTime || 0);
+      if (current) {
+        timeDisplay.textContent = `跳转 ${formatClock(current.t)} · 区间 ${formatClock(segment.start)}–${formatClock(segment.end)} · 现在 ${now}${extra}`;
+      } else {
+        timeDisplay.textContent = `区间 ${formatClock(segment.start)}–${formatClock(segment.end)} · 现在 ${now}${extra}`;
+      }
+    }
+
+    async function selectSegment(start, end, beat, seekTime) {
+      segment = { start, end };
+      current = beat;
+      const target = seekTime ?? beat?.t ?? start;
+
+      nav.querySelectorAll('.beat').forEach((el) => {
+        el.classList.toggle('active', beat && el.dataset.id === beat.id);
+      });
+
+      renderDetail(beat, start, end);
+
+      await seekTo(target);
+      updateTimeDisplay();
+
+      if (autoPlay.checked) {
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+      }
+    }
+
+    function selectBeat(beat) {
+      selectSegment(beat.start, beat.end, beat, beat.t);
+    }
+
+    function renderDetail(beat, start, end) {
+      if (!beat) {
+        detail.innerHTML = `
+          <h2>整幕预览</h2>
+          <p class="meta">${formatClock(start)} – ${formatClock(end)}</p>
+          <p class="note">整幕级别 comment 请写在各节拍上，或后续扩展 act 级字段。</p>`;
+        return;
+      }
+
+      const c = getBeatComments(beat.id);
+      const thumb = frameFiles[beat.id]
+        ? `/public/assets/keyframes/official-trailer/frames/${frameFiles[beat.id]}`
+        : '';
+
+      detail.innerHTML = `
+        <h2>${beat.label}</h2>
+        <p class="meta">${beat.id} · ${beat.range} · anchor ${formatClock(beat.t)}</p>
+        ${thumb ? `<img class="thumb" src="${thumb}" alt="" />` : ''}
+        <div class="tags">${(beat.tags || []).map((t) => `<span class="tag">${t}</span>`).join('')}</div>
+        ${beat.note ? `<p class="note">${beat.note}</p>` : ''}
+        <fieldset>
+          <label for="f-comment">Comment</label>
+          <textarea id="f-comment" placeholder="编排想法、节奏、情绪…">${c.comment || ''}</textarea>
+        </fieldset>
+        <fieldset>
+          <label for="f-transition">Transition</label>
+          <textarea id="f-transition" placeholder="转场特效、入点出点…">${c.transition || ''}</textarea>
+        </fieldset>
+        <fieldset>
+          <label for="f-orchestration">Orchestration</label>
+          <textarea id="f-orchestration" placeholder="滚动/Road/交互…">${c.orchestration || ''}</textarea>
+        </fieldset>`;
+
+      ['comment', 'transition', 'orchestration'].forEach((key) => {
+        detail.querySelector(`#f-${key}`).addEventListener('input', (e) => {
+          getBeatComments(beat.id)[key] = e.target.value;
+          scheduleSave();
+        });
+      });
+    }
+
+    video.addEventListener('timeupdate', () => {
+      if (loopSegment.checked && segment.end && video.currentTime >= segment.end - 0.04) {
+        seekTo(segment.start);
+      }
+      updateTimeDisplay();
+    });
+
+    video.addEventListener('loadedmetadata', () => {
+      saveStatus.textContent = `视频已就绪 (${formatClock(video.duration)}) · Comment 自动保存`;
+    });
+
+    document.getElementById('btn-play').onclick = () => video.play();
+    document.getElementById('btn-pause').onclick = () => video.pause();
+
+    loadData().catch((e) => {
+      saveStatus.textContent = `加载失败: ${e.message}（请用 node tools/orchestration-preview/server.mjs 启动）`;
+    });
+  </script>
+</body>
+</html>

@@ -1,42 +1,37 @@
 # Odyssey's Road / 《归航》
 
-受《奥德赛》启发的 60 秒互动叙事路演原型：新古典主义油画素材、滚动驱动的连续转场、三面真实 HTML 神谕镜、可选的本地头部追踪（MediaPipe），以及为 HTML-in-Canvas、Three.js、Web Audio 预留的扩展接口。
+基于《奥德赛》的**滚动驱动互动叙事**实验项目：序列帧 / 视频 scrub、多层 Renderer、可选本地头部追踪（MediaPipe），架构上预留 HTML-in-Canvas、Three.js、Web Audio。
 
-> **当前状态**：设计已收敛，进入 MVP 实现阶段。运行时代码按 [`docs/TASKS.md`](docs/TASKS.md) 任务卡逐步落地；`src/` 尚为空目录。
+> **当前状态（2026-09-05）**：**V2 MVP 实施中**，本次范围仅 Phase 0–3。
+> Phase 0 主体与 Phase 1 序列渲染已实现；Phase 2 切点精修、Phase 3 shader 与部分验收待完成。
+> 云端接续入口：[`V2_MVP_CLOUD_HANDOFF.md`](docs/handoff/V2_MVP_CLOUD_HANDOFF.md)。源码、配置和基线截图在 Git；完整序列帧须单独恢复。
 
 ## 先读什么
 
 | 顺序 | 文档 | 内容 |
 | --- | --- | --- |
-| 1 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | **已拍板的决定**。任何文档冲突以此为准 |
-| 2 | [`docs/TASKS.md`](docs/TASKS.md) | **MVP 任务卡**：文件所有权、依赖、验收、并行协议 |
-| 3 | [`AGENTS.md`](AGENTS.md) | Agent 协作红线与提交规范 |
+| 1 | [`docs/TRAILER_INDEX.md`](docs/TRAILER_INDEX.md) | **宣传片最终索引**：四幕、43 锚点、标签、转场挂钩 |
+| 2 | [`docs/REDESIGN.md`](docs/REDESIGN.md) | V2 工作区与待办 |
+| 3 | [`docs/README.md`](docs/README.md) | 活跃文档索引 |
 | 4 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | 模块边界、契约、story.config schema |
-| 5 | [`docs/scripts/60s-roadshow/`](docs/scripts/60s-roadshow/README.md) | 逐秒剧本：01 开场与择路、02 Track 3 与归乡（叙事/美术/声音以此为准） |
-| 6 | [`docs/TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md`](docs/TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md) | 神谕镜选择：三区累计停留、HTML-in-Canvas 能力边界 |
-| 7 | [`docs/HEAD_COUPLED_PEEK_TECHNICAL_DESIGN.md`](docs/HEAD_COUPLED_PEEK_TECHNICAL_DESIGN.md) | 斯库拉章单序列头部探视 |
-| 8 | [`docs/ROADSHOW_60S_CUT.md`](docs/ROADSHOW_60S_CUT.md) | 制作总览（较早，细节让位于以上文档） |
-| — | [`prompts/image-prompts/`](prompts/image-prompts/README.md) | 双语图像 Prompt（待按 T7 重写） |
-| — | [`docs/PROMPT_SYSTEM_DESIGN.md`](docs/PROMPT_SYSTEM_DESIGN.md) | Prompt registry 设计（待实现） |
-| — | [`docs/reference/`](docs/reference/PEAR_TECH_REFERENCE.md) | Pear.no 参考实现技术手册、转场研究、架构审计（只作参考） |
-| — | [`references/pear-no/`](references/pear-no/) | Pear.no 快照（仅研究，不复用素材） |
+| 4 | [`AGENTS.md`](AGENTS.md) | Agent 协作约束 |
+| 5 | [`docs/reference/`](docs/reference/README.md) | Pear.no 技术参考索引 |
+| 6 | [`tools/README.md`](tools/README.md) | 预告片抽帧与滚动预览 |
+| — | [`archive/v1-60s-ai-roadshow/`](archive/v1-60s-ai-roadshow/) | V1 剧本 / Prompt / 决策（只读） |
 
-文档优先级（D-013）：DECISIONS > 剧本 > 交互技术设计 > ARCHITECTURE > ROADSHOW > reference。
+## V1 归档说明
 
-## 60 秒结构
+以下内容**不再作为活跃规格**，仅供查阅：
 
-```text
-pre-roll  活画：加载即请求摄像头并滚动校准；第一次滚动即开始（不计时，无按钮）
-00–10s    troy        木马入城 → 焚城 → 雅典娜神像断首 → 裂缝成为海平线
-10–20s    selection   三面神谕镜升起；真实时间 5 秒按头部朝向累计停留；最长者胜出
-20–30s    sirens      塞壬：左右头部混合两种歌声（第一版只做显影，无音频）
-30–40s    scylla      两种死亡：向左看漩涡，向右看斯库拉（单序列 UV 探视）
-40–50s    cattle      太阳神的牛：勿视、勿触 → 落日 → 篝火 → 黎明
-50–60s    homecoming  晴空雷击 → 残影 → 风暴 → 断桅漂流 → 伊萨卡（停在海浪循环）
-```
+- 剧本：`archive/.../docs/scripts/`
+- Prompt：`archive/.../prompts/`
+- 决策与任务卡：`archive/.../docs/DECISIONS.md`、`TASKS.md`
+- AI 抽帧素材：`archive/.../assets/ch01-opening/`
 
-三面神谕镜固定左/中/右：**I 智慧与傲慢**、**II 诱惑与死亡**、**III 歌声与牺牲**（唯一完整路线）。I/II 胜出时进入「这段记忆尚未归来」占位章，可返回或继续 Track 3。
+## 工具链
 
-## 开发
+- **抽帧**：`tools/extract-sequence-frames.mjs`（ffmpeg）
+- **预览**：`tools/sequence-scroll-preview/` + 本地 `python3 -m http.server`
+- **参考实现**：`references/pear-no/`（只研究，不复用 Pear 素材）
 
-技术栈：Vite + TypeScript + React + pnpm（D-014）。工具链由任务卡 T0 建立；建立后本节补充 `pnpm dev / check / build` 说明。
+运行时：Vite 6 + TypeScript + React 19。安装依赖后运行 `pnpm dev`；静态检查与单测用 `pnpm check`，构建用 `pnpm build`。素材恢复、Chromium 安装与截图注意事项见云端交接文档；不要把仅克隆仓库的缺帧状态当作渲染器故障。

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sequence scroll preview · Odyssey's Road lab</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0c10;
+      --fg: #e8ecf4;
+      --muted: #8b95a8;
+      --accent: #c9a962;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: var(--bg);
+      color: var(--fg);
+      font: 14px/1.5 ui-sans-serif, system-ui, sans-serif;
+    }
+
+    .stage {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .scroll-spacer {
+      /* height set from manifest duration in JS */
+      height: 100vh;
+    }
+
+    .hud {
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      z-index: 10;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(8, 10, 14, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+      min-width: 240px;
+      pointer-events: none;
+    }
+
+    .hud h1 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .hud dl {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 2px 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hud dt { color: var(--muted); }
+    .hud dd { text-align: right; }
+
+    .hint {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(8, 10, 14, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      font-size: 13px;
+      pointer-events: none;
+      transition: opacity 0.4s;
+    }
+
+    .hint.hidden { opacity: 0; }
+
+    .error {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      text-align: center;
+      color: #f5a8a8;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <canvas id="canvas" aria-label="Sequence scroll preview"></canvas>
+  </div>
+  <div class="scroll-spacer" id="scroll-spacer" aria-hidden="true"></div>
+  <p class="hint" id="hint">向下滚动 — 滚动距离已按视频时长校准，匀速滚完 ≈ 正常播放</p>
+  <aside class="hud" id="hud" hidden>
+    <h1>Sequence preview</h1>
+    <dl>
+      <dt>asset</dt><dd id="v-asset">—</dd>
+      <dt>frame</dt><dd id="v-frame">—</dd>
+      <dt>progress</dt><dd id="v-progress">—</dd>
+      <dt>time</dt><dd id="v-time">—</dd>
+      <dt>scroll</dt><dd id="v-scroll">—</dd>
+      <dt>positionX</dt><dd id="v-pos">—</dd>
+    </dl>
+  </aside>
+  <div class="error" id="error" hidden></div>
+
+  <script type="module">
+    const clamp01 = (v) => Math.min(1, Math.max(0, v));
+    const smoothstep = (v) => {
+      const t = clamp01(v);
+      return t * t * (3 - 2 * t);
+    };
+
+    const params = new URLSearchParams(location.search);
+    const assetParam = params.get('asset') || '../../public/assets/sequences/demo';
+    const positionXStart = Number(params.get('posStart') ?? 50);
+    const positionXEnd = Number(params.get('posEnd') ?? 50);
+    const posEaseStart = Number(params.get('posEaseStart') ?? 0);
+    const posEaseEnd = Number(params.get('posEaseEnd') ?? 1);
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const hud = document.getElementById('hud');
+    const hint = document.getElementById('hint');
+    const errorEl = document.getElementById('error');
+
+    const vAsset = document.getElementById('v-asset');
+    const vFrame = document.getElementById('v-frame');
+    const vProgress = document.getElementById('v-progress');
+    const vTime = document.getElementById('v-time');
+    const vScroll = document.getElementById('v-scroll');
+    const vPos = document.getElementById('v-pos');
+
+    const assetRoot = new URL(assetParam, location.href).pathname.replace(/\/$/, '');
+    const tier = params.get('tier') || 'desktop';
+
+    const scrollSpacer = document.getElementById('scroll-spacer');
+
+    // ~100vh scroll per 1s of source video → comfortable wheel speed ≈ realtime playback
+    const VH_PER_SECOND = Number(params.get('vhPerSec') ?? 100);
+
+    const frameCache = new Map();
+    let manifest = null;
+    let sourceDurationSec = 0;
+    let lastDrawable = null;
+    let hintHidden = false;
+
+    function applyScrollTrack(durationSec) {
+      sourceDurationSec = durationSec;
+      // +1 viewport: first screen holds frame 1, remaining track maps 0→1 progress
+      const trackVh = Math.max(200, Math.ceil(durationSec * VH_PER_SECOND) + 100);
+      scrollSpacer.style.height = `${trackVh}vh`;
+    }
+
+    function showError(message) {
+      errorEl.hidden = false;
+      errorEl.textContent = message;
+    }
+
+    function framePath(index, ext) {
+      const num = String(index).padStart(4, '0');
+      return `${assetRoot}/${tier}/frame-${num}.${ext}`;
+    }
+
+    function getFrame(src) {
+      if (!frameCache.has(src)) {
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = src;
+        frameCache.set(src, img);
+      }
+      return frameCache.get(src);
+    }
+
+    function drawCoverFrame(image, width, height, positionX = 50) {
+      const coverScale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+      const drawWidth = image.naturalWidth * coverScale;
+      const drawHeight = image.naturalHeight * coverScale;
+      const offsetX = (width - drawWidth) * (positionX / 100);
+      const offsetY = (height - drawHeight) * 0.5;
+      ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+    }
+
+    function scrollProgress() {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (max <= 0) return 0;
+      return clamp01(window.scrollY / max);
+    }
+
+    function positionXForProgress(p) {
+      const span = Math.max(0.0001, posEaseEnd - posEaseStart);
+      const eased = smoothstep((p - posEaseStart) / span);
+      return positionXStart + (positionXEnd - positionXStart) * eased;
+    }
+
+    function preloadNeighbors(index, count, ext) {
+      [index - 2, index - 1, index, index + 1, index + 2].forEach((i) => {
+        if (i >= 1 && i <= count) getFrame(framePath(i, ext));
+      });
+    }
+
+    async function loadManifest() {
+      const res = await fetch(`${assetRoot}/manifest.json`);
+      if (!res.ok) throw new Error(`manifest.json not found at ${assetRoot}/manifest.json (${res.status})`);
+      return res.json();
+    }
+
+    function render() {
+      if (!manifest) return;
+
+      const tierInfo = manifest.tiers?.[tier];
+      if (!tierInfo?.count) {
+        showError(`Tier "${tier}" missing in manifest`);
+        return;
+      }
+
+      const count = tierInfo.count;
+      const ext = (tierInfo.format || 'jpg').replace('jpeg', 'jpg');
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+      }
+
+      const sp = scrollProgress();
+      // Linear: equal scroll share per frame → steady playback when scrolling uniformly
+      const frameIndex = Math.min(count, Math.max(1, Math.floor(sp * count) + 1));
+      const positionX = positionXForProgress(sp);
+      const timeSec = sp * sourceDurationSec;
+
+      preloadNeighbors(frameIndex, count, ext);
+
+      const img = getFrame(framePath(frameIndex, ext));
+      const drawable = img.complete && img.naturalWidth ? img : lastDrawable;
+
+      if (drawable) {
+        lastDrawable = drawable;
+        ctx.save();
+        ctx.scale(dpr, dpr);
+        ctx.fillStyle = '#0a0c10';
+        ctx.fillRect(0, 0, w, h);
+        drawCoverFrame(drawable, w, h, positionX);
+        ctx.restore();
+      }
+
+      vAsset.textContent = manifest.id || assetRoot.split('/').pop();
+      vFrame.textContent = `${frameIndex} / ${count}`;
+      vProgress.textContent = sp.toFixed(3);
+      vTime.textContent = `${timeSec.toFixed(2)}s / ${sourceDurationSec.toFixed(2)}s`;
+      vScroll.textContent = `${Math.round(window.scrollY)}px`;
+      vPos.textContent = `${positionX.toFixed(1)}%`;
+
+      if (!hintHidden && sp > 0.02) {
+        hintHidden = true;
+        hint.classList.add('hidden');
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    try {
+      manifest = await loadManifest();
+      const tierInfo = manifest.tiers[tier];
+      const count = tierInfo.count;
+      const fps = tierInfo.fps || 30;
+      applyScrollTrack(count / fps);
+
+      hud.hidden = false;
+      const ext = (tierInfo.format || 'jpg').replace('jpeg', 'jpg');
+      getFrame(framePath(1, ext));
+      [Math.ceil(count / 4), Math.ceil(count / 2), count].forEach((i) => getFrame(framePath(i, ext)));
+      requestAnimationFrame(render);
+    } catch (err) {
+      showError(`${err.message}\n\n用法：先运行 extract-sequence-frames，再在本页 URL 加 ?asset=../../lab/sequences/<id>`);
+    }
+  </script>
+</body>
+</html>

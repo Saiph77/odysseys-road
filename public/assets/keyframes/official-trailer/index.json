@@ -1,0 +1,570 @@
+{
+  "source": "/Users/saiph/Downloads/66443bfd-1e56-4625-9cc6-2d318172909a.mp4",
+  "extractedAt": "2026-09-05",
+  "count": 43,
+  "frames": [
+    {
+      "id": "001-universal",
+      "t": 2.5,
+      "range": "00:00-00:05",
+      "label": "厂标",
+      "act": 1,
+      "tags": [
+        "厂标"
+      ],
+      "file": "001-universal_00m02.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/001-universal_00m02.5s.jpg"
+    },
+    {
+      "id": "002-shipwreck",
+      "t": 8,
+      "range": "00:05-00:11",
+      "label": "海难、漂流",
+      "act": 1,
+      "tags": [
+        "海难",
+        "漂流",
+        "残骸"
+      ],
+      "file": "002-shipwreck_00m08.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/002-shipwreck_00m08.0s.jpg"
+    },
+    {
+      "id": "003-penelope",
+      "t": 13.5,
+      "range": "00:11-00:16",
+      "label": "Penelope、爱情",
+      "act": 1,
+      "tags": [
+        "Penelope",
+        "爱情",
+        "家"
+      ],
+      "file": "003-penelope_00m13.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/003-penelope_00m13.5s.jpg"
+    },
+    {
+      "id": "004-telemachus",
+      "t": 18,
+      "range": "00:16-00:20",
+      "label": "Telemachus、儿子",
+      "act": 1,
+      "tags": [
+        "Telemachus",
+        "儿子"
+      ],
+      "file": "004-telemachus_00m18.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/004-telemachus_00m18.0s.jpg"
+    },
+    {
+      "id": "005-trojan-horse",
+      "t": 22,
+      "range": "00:20-00:24",
+      "label": "木马、特洛伊",
+      "act": 1,
+      "tags": [
+        "木马",
+        "特洛伊"
+      ],
+      "file": "005-trojan-horse_00m22.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/005-trojan-horse_00m22.0s.jpg"
+    },
+    {
+      "id": "006-troy-fire",
+      "t": 27,
+      "range": "00:24-00:30",
+      "label": "攻城、火焰",
+      "act": 1,
+      "tags": [
+        "攻城",
+        "火焰",
+        "特洛伊"
+      ],
+      "file": "006-troy-fire_00m27.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/006-troy-fire_00m27.0s.jpg"
+    },
+    {
+      "id": "007-go-home",
+      "t": 32.5,
+      "range": "00:30-00:35",
+      "label": "孤独、归乡",
+      "act": 1,
+      "tags": [
+        "奥德修斯",
+        "孤独",
+        "归乡"
+      ],
+      "file": "007-go-home_00m32.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/007-go-home_00m32.5s.jpg"
+    },
+    {
+      "id": "008-nolan-card",
+      "t": 36.5,
+      "range": "00:35-00:38",
+      "label": "FROM CHRISTOPHER NOLAN",
+      "act": 2,
+      "tags": [
+        "字卡"
+      ],
+      "file": "008-nolan-card_00m36.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/008-nolan-card_00m36.5s.jpg"
+    },
+    {
+      "id": "009-ithaca-palace",
+      "t": 41,
+      "range": "00:38-00:44",
+      "label": "伊萨卡宫殿、宴席",
+      "act": 2,
+      "tags": [
+        "Ithaca",
+        "宫殿",
+        "宴席"
+      ],
+      "file": "009-ithaca-palace_00m41.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/009-ithaca-palace_00m41.0s.jpg"
+    },
+    {
+      "id": "010-penelope-loom",
+      "t": 47.5,
+      "range": "00:44-00:51",
+      "label": "王后、织机、求婚者",
+      "act": 2,
+      "tags": [
+        "王后",
+        "织机",
+        "求婚者"
+      ],
+      "file": "010-penelope-loom_00m47.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/010-penelope-loom_00m47.5s.jpg"
+    },
+    {
+      "id": "011-cave-flock",
+      "t": 53.5,
+      "range": "00:51-00:56",
+      "label": "洞穴、羊群",
+      "act": 2,
+      "tags": [
+        "洞穴",
+        "羊群",
+        "探索"
+      ],
+      "file": "011-cave-flock_00m53.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/011-cave-flock_00m53.5s.jpg"
+    },
+    {
+      "id": "012-island-telemachus",
+      "t": 58.5,
+      "range": "00:56-01:01",
+      "label": "岛屿、寻找",
+      "act": 2,
+      "tags": [
+        "岛屿",
+        "寻找"
+      ],
+      "file": "012-island-telemachus_00m58.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/012-island-telemachus_00m58.5s.jpg"
+    },
+    {
+      "id": "013-suitors",
+      "t": 65,
+      "range": "01:01-01:09",
+      "label": "求婚者、Telemachus",
+      "act": 2,
+      "tags": [
+        "求婚者",
+        "Telemachus"
+      ],
+      "file": "013-suitors_01m05.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/013-suitors_01m05.0s.jpg"
+    },
+    {
+      "id": "014-wounded-soldiers",
+      "t": 72,
+      "range": "01:09-01:15",
+      "label": "伤兵、漂泊",
+      "act": 2,
+      "tags": [
+        "战争",
+        "伤兵",
+        "漂泊"
+      ],
+      "file": "014-wounded-soldiers_01m12.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/014-wounded-soldiers_01m12.0s.jpg"
+    },
+    {
+      "id": "015-shore-search",
+      "t": 76.5,
+      "range": "01:15-01:18",
+      "label": "海岸、寻父",
+      "act": 2,
+      "tags": [
+        "海岸",
+        "寻父"
+      ],
+      "file": "015-shore-search_01m16.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/015-shore-search_01m16.5s.jpg"
+    },
+    {
+      "id": "016-red-sail-first",
+      "t": 78,
+      "range": "01:17-01:19",
+      "label": "红帆船首次完整",
+      "act": 2,
+      "tags": [
+        "红帆船"
+      ],
+      "file": "016-red-sail-first_01m18.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/016-red-sail-first_01m18.0s.jpg"
+    },
+    {
+      "id": "017-odysseus-wounded",
+      "t": 81.5,
+      "range": "01:19-01:24",
+      "label": "受伤奥德修斯、归家",
+      "act": 2,
+      "tags": [
+        "奥德修斯",
+        "归家"
+      ],
+      "file": "017-odysseus-wounded_01m21.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/017-odysseus-wounded_01m21.5s.jpg"
+    },
+    {
+      "id": "018-charge",
+      "t": 85.5,
+      "range": "01:24-01:28",
+      "label": "冲锋、大军",
+      "act": 3,
+      "tags": [
+        "冲锋",
+        "大军"
+      ],
+      "note": "奥德修斯拔剑怒吼冲锋；86.0s 已为荒原远景",
+      "file": "018-charge_01m25.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/018-charge_01m25.5s.jpg"
+    },
+    {
+      "id": "019-july16-card",
+      "t": 89,
+      "range": "01:28-01:30",
+      "label": "ON JULY 16",
+      "act": 3,
+      "tags": [
+        "字卡"
+      ],
+      "file": "019-july16-card_01m29.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/019-july16-card_01m29.0s.jpg"
+    },
+    {
+      "id": "020-forest-mist",
+      "t": 92,
+      "range": "01:30-01:34",
+      "label": "森林、迷雾",
+      "act": 3,
+      "tags": [
+        "森林",
+        "迷雾"
+      ],
+      "file": "020-forest-mist_01m32.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/020-forest-mist_01m32.0s.jpg"
+    },
+    {
+      "id": "021-silver-giant",
+      "t": 96,
+      "range": "01:34-01:38",
+      "label": "银甲巨人、近战",
+      "act": 3,
+      "tags": [
+        "银甲巨人",
+        "近战"
+      ],
+      "file": "021-silver-giant_01m36.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/021-silver-giant_01m36.0s.jpg"
+    },
+    {
+      "id": "022-palace-intrigue",
+      "t": 100,
+      "range": "01:38-01:42",
+      "label": "阴谋、宫殿",
+      "act": 3,
+      "tags": [
+        "阴谋",
+        "宫殿"
+      ],
+      "file": "022-palace-intrigue_01m40.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/022-palace-intrigue_01m40.0s.jpg"
+    },
+    {
+      "id": "023-storm-sea",
+      "t": 104,
+      "range": "01:42-01:46",
+      "label": "风暴、航海",
+      "act": 3,
+      "tags": [
+        "风暴",
+        "航海"
+      ],
+      "file": "023-storm-sea_01m44.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/023-storm-sea_01m44.0s.jpg"
+    },
+    {
+      "id": "024-mist-entity",
+      "t": 106,
+      "range": "01:45-01:47",
+      "label": "迷雾、未知存在",
+      "act": 3,
+      "tags": [
+        "迷雾",
+        "未知存在"
+      ],
+      "file": "024-mist-entity_01m46.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/024-mist-entity_01m46.0s.jpg"
+    },
+    {
+      "id": "025-mystery-woman",
+      "t": 108,
+      "range": "01:46-01:50",
+      "label": "神秘女性、海岸",
+      "act": 3,
+      "tags": [
+        "神秘女性",
+        "海岸"
+      ],
+      "file": "025-mystery-woman_01m48.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/025-mystery-woman_01m48.0s.jpg"
+    },
+    {
+      "id": "026-fire-battle",
+      "t": 110,
+      "range": "01:49-01:51",
+      "label": "城战、火",
+      "act": 3,
+      "tags": [
+        "城战",
+        "火"
+      ],
+      "file": "026-fire-battle_01m50.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/026-fire-battle_01m50.0s.jpg"
+    },
+    {
+      "id": "027-injured-youth",
+      "t": 112.5,
+      "range": "01:51-01:54",
+      "label": "受伤、失败",
+      "act": 3,
+      "tags": [
+        "受伤",
+        "失败"
+      ],
+      "file": "027-injured-youth_01m52.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/027-injured-youth_01m52.5s.jpg"
+    },
+    {
+      "id": "028-kiss-animal",
+      "t": 115.5,
+      "range": "01:54-01:57",
+      "label": "爱情、家园、动物",
+      "act": 3,
+      "tags": [
+        "爱情",
+        "家园",
+        "动物"
+      ],
+      "file": "028-kiss-animal_01m55.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/028-kiss-animal_01m55.5s.jpg"
+    },
+    {
+      "id": "029-army-plains",
+      "t": 119,
+      "range": "01:57-02:01",
+      "label": "航行、大军",
+      "act": 3,
+      "tags": [
+        "航行",
+        "大军"
+      ],
+      "file": "029-army-plains_01m59.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/029-army-plains_01m59.0s.jpg"
+    },
+    {
+      "id": "030-red-sail-crossing",
+      "t": 122,
+      "range": "02:01-02:03",
+      "label": "红帆船、归途",
+      "act": 3,
+      "tags": [
+        "红帆船",
+        "归途"
+      ],
+      "file": "030-red-sail-crossing_02m02.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/030-red-sail-crossing_02m02.0s.jpg"
+    },
+    {
+      "id": "031-night-battle",
+      "t": 124,
+      "range": "02:03-02:05",
+      "label": "夜战",
+      "act": 3,
+      "tags": [
+        "夜战"
+      ],
+      "file": "031-night-battle_02m04.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/031-night-battle_02m04.0s.jpg"
+    },
+    {
+      "id": "032-cavalry",
+      "t": 126,
+      "range": "02:05-02:07",
+      "label": "大军、骑兵",
+      "act": 3,
+      "tags": [
+        "大军",
+        "骑兵"
+      ],
+      "file": "032-cavalry_02m06.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/032-cavalry_02m06.0s.jpg"
+    },
+    {
+      "id": "033-odysseus-fate",
+      "t": 128,
+      "range": "02:07-02:09",
+      "label": "奥德修斯、命运",
+      "act": 3,
+      "tags": [
+        "奥德修斯",
+        "命运"
+      ],
+      "file": "033-odysseus-fate_02m08.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/033-odysseus-fate_02m08.0s.jpg"
+    },
+    {
+      "id": "034-oars-rock",
+      "t": 130,
+      "range": "02:09-02:11",
+      "label": "划桨、岩岛、急转",
+      "act": 3,
+      "tags": [
+        "划桨",
+        "岩岛",
+        "急转"
+      ],
+      "file": "034-oars-rock_02m10.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/034-oars-rock_02m10.0s.jpg"
+    },
+    {
+      "id": "035-city-fire-charge",
+      "t": 131.5,
+      "range": "02:11-02:12",
+      "label": "城破、火灾",
+      "act": 3,
+      "tags": [
+        "城破",
+        "火灾"
+      ],
+      "file": "035-city-fire-charge_02m11.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/035-city-fire-charge_02m11.5s.jpg"
+    },
+    {
+      "id": "036-beach-landing",
+      "t": 132.5,
+      "range": "02:12-02:13",
+      "label": "海滩冲锋",
+      "act": 3,
+      "tags": [
+        "海滩冲锋"
+      ],
+      "file": "036-beach-landing_02m12.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/036-beach-landing_02m12.5s.jpg"
+    },
+    {
+      "id": "037-climb-red-sail",
+      "t": 132.8,
+      "range": "02:13-02:14",
+      "label": "红帆、攀爬",
+      "act": 3,
+      "tags": [
+        "红帆",
+        "攀爬"
+      ],
+      "note": "133.5s 已切到神像场景；攀爬峰值在 132.8s",
+      "file": "037-climb-red-sail_02m12.8s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/037-climb-red-sail_02m12.8s.jpg"
+    },
+    {
+      "id": "038-statue-fire",
+      "t": 134.5,
+      "range": "02:14-02:15",
+      "label": "神像、亵渎、火焰",
+      "act": 3,
+      "tags": [
+        "神像",
+        "亵渎",
+        "火焰"
+      ],
+      "file": "038-statue-fire_02m14.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/038-statue-fire_02m14.5s.jpg"
+    },
+    {
+      "id": "039-title",
+      "t": 136.5,
+      "range": "02:15-02:18",
+      "label": "THE ODYSSEY",
+      "act": 4,
+      "tags": [
+        "Title"
+      ],
+      "file": "039-title_02m16.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/039-title_02m16.5s.jpg"
+    },
+    {
+      "id": "040-cyclops-setup",
+      "t": 139.5,
+      "range": "02:18-02:21",
+      "label": "洞穴、巨人 asleep",
+      "act": 4,
+      "tags": [
+        "洞穴",
+        "巨人"
+      ],
+      "file": "040-cyclops-setup_02m19.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/040-cyclops-setup_02m19.5s.jpg"
+    },
+    {
+      "id": "041-cyclops-hand",
+      "t": 141.5,
+      "range": "02:21-02:22",
+      "label": "Cyclops、巨手",
+      "act": 4,
+      "tags": [
+        "Cyclops",
+        "巨手"
+      ],
+      "file": "041-cyclops-hand_02m21.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/041-cyclops-hand_02m21.5s.jpg"
+    },
+    {
+      "id": "042-release-date",
+      "t": 143,
+      "range": "02:22-02:24",
+      "label": "16.07.26",
+      "act": 4,
+      "tags": [
+        "定档"
+      ],
+      "file": "042-release-date_02m23.0s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/042-release-date_02m23.0s.jpg"
+    },
+    {
+      "id": "043-imax",
+      "t": 145.5,
+      "range": "02:24-02:26.75",
+      "label": "IMAX",
+      "act": 4,
+      "tags": [
+        "IMAX"
+      ],
+      "file": "043-imax_02m25.5s.jpg",
+      "path": "public/assets/keyframes/official-trailer/frames/043-imax_02m25.5s.jpg"
+    }
+  ]
+}

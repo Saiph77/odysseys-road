@@ -1,7 +1,9 @@
 # 《归航 / NOSTOS》空间 Track 选择技术设计
 
+> **V2 说明（2026-09-05）**：本文描述 V1「三面神谕镜」交互的**技术模式**（累计停留、HTML 镜面、InteractionFrame 消费），供 V2 重做 UX 时参考；**具体镜数、文案、章节名不绑定 V2**。V1 产品决策见 `archive/v1-60s-ai-roadshow/docs/DECISIONS.md`。
+
 > 版本：V2.1（选择机制改为三区累计停留，吸收 D-001/D-002/D-003/D-010）
-> 状态：待实现（TASKS T2 / T4），待目标 Chromium 实测
+> 状态：**技术参考** — V2 交互待重新设计
 > 目标：三面真实 HTML 神谕镜（第一版 DOM/CSS 3D，预留 HTML-in-Canvas + Three.js），通过头部朝向的累计停留或常规输入选择 Track
 > 架构约束：本模块只接收 `SceneFrame`、`InteractionFrame` 与 `SelectionState`，不拥有 Road、章节顺序或完成状态
 > 更新日期：2026-09-05

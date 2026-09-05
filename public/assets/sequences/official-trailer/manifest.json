@@ -1,0 +1,26 @@
+{
+  "id": "official-trailer",
+  "description": "官方《奥德赛》宣传片完整序列（V2 主素材）",
+  "source": {
+    "file": "66443bfd-1e56-4625-9cc6-2d318172909a.mp4",
+    "pathNote": "原始文件在开发者本机 Downloads；未入库",
+    "durationSec": 146.75,
+    "nativeFps": 29.97
+  },
+  "extractedAt": "2026-09-05",
+  "tiers": {
+    "desktop": {
+      "count": 3522,
+      "pattern": "frame-%04d.jpg",
+      "width": 1280,
+      "height": 720,
+      "fps": 24,
+      "format": "jpg",
+      "durationSec": 146.75
+    }
+  },
+  "scroll": {
+    "frameIndexFormula": "floor(localProgress * count) + 1",
+    "note": "全长约 2m27s；按时间线切分子段时用 --start/--duration 重新抽帧"
+  }
+}
