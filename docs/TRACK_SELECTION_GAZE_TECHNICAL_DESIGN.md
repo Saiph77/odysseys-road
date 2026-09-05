@@ -1,12 +1,12 @@
 # 《归航 / NOSTOS》空间 Track 选择技术设计
 
-> 版本：V2.0 设计草案
-> 状态：待实现、待目标 Chromium 实测
-> 目标：组合 HTML-in-Canvas、Three.js 与可选 MediaPipe，让三块真实 HTML 画卷进入 3D 空间，并通过凝视停留或常规输入选择 Track
-> 架构约束：本模块只接收 `SceneFrame` 与 `InteractionFrame`，不拥有 Road、章节顺序或完成状态
+> 版本：V2.1（选择机制改为三区累计停留，吸收 D-001/D-002/D-003/D-010）
+> 状态：待实现（TASKS T2 / T4），待目标 Chromium 实测
+> 目标：三面真实 HTML 神谕镜（第一版 DOM/CSS 3D，预留 HTML-in-Canvas + Three.js），通过头部朝向的累计停留或常规输入选择 Track
+> 架构约束：本模块只接收 `SceneFrame`、`InteractionFrame` 与 `SelectionState`，不拥有 Road、章节顺序或完成状态
 > 更新日期：2026-09-05
 
-> 第一版范围说明：60 秒路演只完整开放 Track 3；Track 1、Track 2 保留空间关注反馈，但不能确认进入。现场节奏、失败保护和十秒选路窗口以 [`ROADSHOW_60S_CUT.md`](ROADSHOW_60S_CUT.md) 为准。
+> 第一版口径（见 `DECISIONS.md`）：三镜均可胜出；Track 1/2 胜出进入 `memory-pending` 占位章（D-001）。选择规则是 §7 的三区累计，不是早期的"连续停留 + 确认"两段式（D-002）。摄像头全程运行，不在选中后停止（D-003）。神谕镜第一版走 `SemanticDomBridge`（D-010）。
 
 ## 1. 结论先行
 
@@ -20,15 +20,15 @@
 
 ```text
 Scroll -> StoryDirector -> SceneFrame ------------------------┐
-                                                              ├-> ThreeHtmlRenderer
+                                                              ├-> OracleMirrorsRenderer
 Pointer/Keyboard/Camera -> InteractionEngine -> InteractionFrame ┘
 
 HTML subtree -> HtmlCanvasBridge -> THREE.HTMLTexture -> Mesh
 Mesh projection -> GeometrySync -> DOM hit testing/accessibility
-DwellController -> confirmed TrackId -> StoryRouter
+ZoneDwellSelector -> winnerId -> StoryRouter
 ```
 
-首发不做精确眼动追踪。P1 先用 pointer/keyboard 证明真实 HTML 交互和 3D geometry；P2 再加入本地头部方向；虹膜方向只有在真实测试证明优于纯头部方案时才作为小权重增强。
+首发不做精确眼动追踪，以头部 yaw 为注视代理。第一版就同时提供 pointer/keyboard/MediaPipe 三种 provider（T2）；神谕镜用 DOM/CSS 3D（T4）；HTML-in-Canvas 原生路径与 Three.js 是第二波（T14）。虹膜方向只有在真实测试证明优于纯头部方案时才作为小权重增强。
 
 ## 2. 用户体验设计
 
@@ -46,7 +46,7 @@ DwellController -> confirmed TrackId -> StoryRouter
 
 ### 2.2 输入不是门槛
 
-默认立即支持 pointer、touch、keyboard；摄像头默认关闭。用户主动点击“启用凝视航向”后才请求权限，并显示：
+默认支持 pointer、keyboard；摄像头在 pre-roll 的「开始归航」按钮点击时请求（D-004），并在按钮下方显示：
 
 > 影像只在本机处理，不录制、不上传。
 
@@ -54,15 +54,12 @@ DwellController -> confirmed TrackId -> StoryRouter
 
 ### 2.3 体验状态
 
-1. **Pointer ready**：三块铭牌可 hover/focus/click。
-2. **Permission pending**：只在用户手势后出现。
-3. **Calibrating**：自然坐姿看向中心，采集短时基线。
-4. **Tracking**：头部只驱动低幅视差和候选区域。
-5. **Dwelling**：当前目标累计连续停留；金环增长。
-6. **Armed**：目标稳定，进一步停留即确认；live region 宣布目标。
-7. **Selected**：只输出一次 Track ID，停止摄像头并进入转场。
+1. **Rise**（滚动驱动）：三镜升起；hover/focus/头部偏向已有 5–8% 靠近反馈，但不累计。
+2. **Collect**（真实时间 4.5s）：滚动被锁；按头部/指针所在区累计停留；镜面远近、亮度、金纹随累计比例变化。
+3. **Freeze**（真实时间 0.5s）：停止累计，排名显形。
+4. **Resolved**：产出一次 `winnerId`；解锁滚动；摄像头继续运行。
 
-鼠标点击和键盘 Enter 可立即确认，不强迫等待凝视的 2.4 秒。触摸采用“第一次预览、第二次确认”或显式按钮，避免误触。
+鼠标点击某镜或键盘 Enter 在任意阶段立即 Resolved，不必等 5 秒。没有触摸路径（D-008）。
 
 ## 3. 原生 HTML-in-Canvas 能力边界
 
@@ -116,7 +113,7 @@ Native
 
 Polyfill
   semantic DOM + three-html-render rasterization/event bridge
-  -> same ThreeHtmlRenderer contract
+  -> same OracleMirrorsRenderer contract
 
 DOM fallback
   same semantic card content
@@ -151,22 +148,22 @@ src/
 ├── capabilities/htmlInCanvas.ts
 ├── interaction/
 │   ├── InteractionEngine.ts
-│   ├── DwellController.ts
+│   ├── ZoneDwellSelector.ts
 │   └── providers/
 │       ├── PointerProvider.ts
 │       ├── KeyboardProvider.ts
 │       └── MediaPipeProvider.ts
-├── renderers/ThreeHtmlRenderer.ts
+├── renderers/OracleMirrorsRenderer.ts   （第一版 DOM/CSS 3D；T14 接 Three）
 └── content/trackCards.ts
 ```
 
 | 模块 | 唯一职责 | 禁止知道 |
 | --- | --- | --- |
 | `HtmlCanvasBridge` | 能力探测、native/polyfill/fallback、geometry cleanup | Road、Track 完成状态 |
-| `ThreeHtmlRenderer` | Mesh、相机、材质、HTMLTexture 生命周期 | `scrollY`、MediaPipe landmarks |
+| `OracleMirrorsRenderer` | 三镜 DOM、CSS 3D 变换（第二波：Mesh/HTMLTexture）生命周期 | `scrollY`、MediaPipe landmarks |
 | `InteractionEngine` | 输入归一、平滑、切换 provider | story config、Renderer 实现 |
 | `MediaPipeProvider` | 摄像头/模型/landmarks → sample | Track ID、dwell、路由 |
-| `DwellController` | 连续停留、宽限、确认状态机 | Three.js、摄像头 |
+| `ZoneDwellSelector` | 三区累计、冻结、胜者判定状态机 | Three.js、摄像头 |
 | `StoryRouter` | 接收 confirmed Track ID 并切章 | focusX、mesh、landmarks |
 
 ## 5. 数据接口
@@ -182,26 +179,28 @@ type InteractionSample = Readonly<{
   timestamp: number;
 }>;
 
+type Zone = 'left' | 'center' | 'right';
+
 type SelectionState = Readonly<{
-  phase: 'ready' | 'calibrating' | 'tracking' | 'dwelling' | 'armed' | 'selected';
-  candidateId: string | null;
-  continuousDwellMs: number;
-  attentionScores: Readonly<Record<string, number>>;
-  confirmedTrackId: string | null;
+  phase: 'idle' | 'collect' | 'freeze' | 'resolved';
+  zone: Zone | null;
+  dwellMs: Readonly<Record<Zone, number>>;
+  elapsedMs: number;
+  winnerId: string | null;   // track-a | track-b | track-c
 }>;
 ```
 
-Router 只允许接触 `confirmedTrackId`；原始视频、landmarks、头部轨迹和逐帧 attention score 永远不进入故事状态或服务端接口。
+`InteractionSample` 与 ARCHITECTURE §5.1 的 `InteractionFrame` 同构，另含 `yaw` 与 `focusX`。Router 只允许接触 `winnerId`；原始视频、landmarks、头部轨迹和逐帧 dwell 永远不进入故事状态或服务端接口。
 
 ## 6. 头部方向与眼球方向
 
-### 6.1 P2 首选：头部方向
+### 6.1 第一版：头部方向（T2）
 
 参考快照的 `MediaPipeHeadTracker` 已验证一条可研究路径：太阳穴 landmark 估计脸部中心和宽度、变换矩阵估计 yaw、推理约 24Hz、GPU 失败退 CPU。目标项目应从零实现 provider，而不是复制品牌组件和 Road 常量。
 
 头部方向适合三块横向大目标：对普通摄像头更稳定，也更容易向用户解释“轻微转头选择”。输出只保留低维归一值。
 
-### 6.2 P3 实验：虹膜小权重修正
+### 6.2 实验（未排期）：虹膜小权重修正
 
 ```text
 gazeX = robustMean(leftIrisRatio, rightIrisRatio)
@@ -212,49 +211,78 @@ focusX = headPoseX * 0.65 + calibratedGazeX * 0.35
 
 ## 7. 焦点、停留和确认
 
-### 7.1 迟滞
+本节是 D-002 的实现细则。所有数值是初始值，只能放在 `src/config/interaction.config.ts`（T2 拥有），实机可调。
 
-进入和离开候选使用不同边界，避免在卡片边缘抖动。阈值是 interaction config，不是 Road 常量。初始实验值可参考：
+### 7.1 输入到分区
 
 ```text
-center -> left   x < -0.30     left -> center   x > -0.14
-center -> right  x >  0.30     right -> center  x <  0.14
+focusX = clamp(x * 0.42 + yaw * 0.78)      // 头部；位置权重低、转头权重高
+focusX = viewportX                          // 指针，-1..1
+focusX ← ←/→ 键平滑推动的虚拟焦点            // 键盘
 ```
 
-所有值需实测；移动端不沿用桌面阈值。
+三区带迟滞：
 
-### 7.2 两种时间不能混用
+```text
+center -> left    focusX < -0.30      left  -> center   focusX > -0.14
+center -> right   focusX >  0.30      right -> center   focusX <  0.14
+```
 
-- `attentionScore`：可衰减的历史关注，只控制视觉排名。
-- `continuousDwell`：当前目标连续停留，只控制确认。
+### 7.2 累计规则
 
-仅用累计分数会误选：用户先看左边三秒，之后认真看右边一秒，系统可能突然进入左边。
+- 只在 `phase = collect` 累计；`detected && confidence ≥ 0.55` 的帧才计入。
+- 每步 `dt = min(now - prev, 50ms)`，后台恢复不会一次补满。
+- `dwellMs[zone] += dt`；不衰减、不归一化。
+- 视觉只读 `dwellMs[z] / max(sum, 1)` 的平滑值与当前 `zone`，不显示数字。
 
-### 7.3 初始参数（待真实验证）
+### 7.3 时序
+
+| 阶段 | 驱动 | 时长 | 进入条件 | 期间滚动 |
+| --- | --- | ---: | --- | --- |
+| `idle` | 滚动 | — | 章节开始 | 正常 |
+| `collect` | 真实时间 | 4500ms | Road 到达 `chapter.gate.atRoad` | **锁住**（ScrollGate） |
+| `freeze` | 真实时间 | 500ms | collect 超时 | 锁住 |
+| `resolved` | 一次 | — | freeze 超时，或任意时刻 `confirm()` | 解锁 |
+
+### 7.4 胜者判定
+
+```text
+if confirmed(zone)             -> winner = track(zone)            // click / Enter
+else if sum(dwellMs) < 1000    -> winner = release.defaultTrackId // 几乎无人看："海替你决定"
+else                           -> winner = argmax(dwellMs)
+                                  tie -> zone at freeze
+                                  still tie -> release.defaultTrackId
+```
+
+`winner ∉ enabledTrackIds` → Router 路由到 `memory-pending`（D-001）。
+
+### 7.5 初始参数
 
 | 参数 | 初始值 | 作用 |
 | --- | ---: | --- |
-| `ARM_MS` | 1800ms | 进入 armed |
-| `CONFIRM_MS` | 600ms | armed 后继续停留 |
-| `LEAVE_GRACE_MS` | 250ms | 短暂扫视宽限 |
-| `LOST_FACE_CANCEL_MS` | 800ms | 丢脸后取消 |
-| `MIN_CONFIDENCE` | 0.55 | 参与 dwell 的最低可信度 |
-| `MAX_DT_MS` | 50ms | 防后台恢复跳时 |
+| `ZONE_ENTER` | ±0.30 | 进入左/右区 |
+| `ZONE_EXIT` | ±0.14 | 回到中区 |
+| `COLLECT_MS` | 4500 | 累计窗口 |
+| `FREEZE_MS` | 500 | 冻结显形 |
+| `MIN_TOTAL_MS` | 1000 | 低于此值走默认 Track |
+| `MIN_CONFIDENCE` | 0.55 | 参与累计的最低置信 |
+| `MAX_DT_MS` | 50 | 单步上限 |
+| `SMOOTH_MS` | 140–220 | focusX 视觉平滑（不影响累计） |
+| `LOST_RECENTER_MS` | 500–800 | 丢脸后 focusX 回中 |
 
-### 7.4 状态机
+### 7.6 为什么不用"连续停留 + 确认"
+
+早期 V2.0 采用 `1.8s + 0.6s` 两段式并警告"纯累计会误选"。这里明确接受纯累计，理由：① 窗口只有 5 秒且有 0.5s 冻结，"先看左 3 秒再看右 1 秒选左"正是剧本想表达的"海记住你停留最久的地方"；② 现场只有一人、目标只有三个，误选的代价是进入占位章而非丢失剧情；③ 规则对观众可解释。若 T15 实测发现体验差，再以新决策取代 D-002。
+
+### 7.7 状态机
 
 ```text
-PointerReady
-  └─ user consent -> PermissionPending
-       ├─ failed/denied -> PointerReady
-       └─ success -> Calibrating -> Tracking
-
-Tracking -> Dwelling -> Armed -> Selected -> TrackTransition
-    ^          |          |
-    └──────────┴──────────┘ leave beyond grace / face lost
+idle ──road ≥ gate──> collect ──4500ms──> freeze ──500ms──> resolved
+  │                      │                  │
+  └──── confirm() ───────┴──────────────────┘ ───────────> resolved
 ```
 
-页面隐藏时暂停计时；超过丢失阈值取消 armed。selected 只能发出一次，随后停止 provider、清 geometry、销毁 Three 资源。
+页面隐藏时暂停计时（dt 上限保证恢复后不跳）。`resolved` 只发出一次。
 
 ## 8. Three.js 渲染与交互
 
@@ -273,20 +301,20 @@ read latest InteractionFrame
 -> renderer.render
 ```
 
-DOM event 进入统一 action callback，再交给 DwellController/Router；Renderer 不直接写 journey store。
+DOM event（click / Enter）进入统一 action callback → `ZoneDwellSelector.confirm(zone)`；Renderer 不直接写 journey store。
 
 ### 8.2 视觉反馈
 
 - 当前候选前移 `0.12–0.22` 世界单位，scale `1.035–1.055`。
 - 非候选降低亮度而不完全消失，保持空间定位。
-- attention ranking 调深度/材质；continuous dwell 单独画金色环。
+- `dwellMs` 比例调深度/亮度/金纹闭合；当前 `zone` 额外给 5–8% 靠近。
 - reduced motion 取消大幅 Z 位移和镜头漂移，保留边框、亮度与线性进度。
 
-数值属于可调 interaction/renderer config，不写进 JSX，也不影响章节 Road。
+数值属于可调 interaction/renderer config，不写进 JSX，也不影响章节 Road。第一版用 CSS `perspective` + `transform3d` 实现同样的反馈（T4），Three.js 版本沿用同一组参数（T14）。
 
 ### 8.3 Off-axis projection
 
-头部 x/y/z 可轻微改变相机投影，让屏幕像“窗口”而不是随鼠标旋转的相册。强度必须小；头部追踪失败时相机缓慢回中心，不能突然跳变。移动端默认关闭摄像头与 off-axis，仅保留触摸布局。
+头部 x/y/z 可轻微改变相机投影，让屏幕像“窗口”而不是随鼠标旋转的相册。强度必须小；头部追踪失败时相机缓慢回中心，不能突然跳变。第一版用 CSS 整体 `rotateY(focusX * 少量角度)` 近似。
 
 ## 9. StoryRouter 与完成状态
 
@@ -295,18 +323,18 @@ type JourneyState = Readonly<{
   currentChapterId: string;
   completedTrackIds: readonly string[];
   selectionOrder: readonly string[];
-  selectionMethod: 'head-dwell' | 'head-gaze-dwell' | 'pointer' | 'keyboard' | null;
+  selectionMethod: 'head-dwell' | 'pointer-dwell' | 'pointer-confirm' | 'keyboard' | 'default' | null;
 }>;
 ```
 
-进入 Track 只写 `currentChapterId`。路演 release profile 中只有 Track 3 可确认，确认后直接进入 Ch.03–06 与 finale；Track 1/2 保留 hover/focus/dwell 反馈，状态机在确认前输出「这段记忆尚未归来」并回到 tracking。
+进入 Track 只写 `currentChapterId`。`winnerId ∈ enabledTrackIds` → 进入该 Track 章节序列（Track 3：sirens → scylla → cattle → homecoming）；否则进入 `memory-pending` 占位章，页面提供「返回神谕镜」「继续 Track 3」两个真实按钮（D-001）。
 
 只持久化 JourneyState 的非生物特征字段。摄像头样本、attention score、精确 dwell 轨迹不保存。重新开始只清理本项目自己的 namespaced key。
 
 ## 10. 隐私、安全与无障碍
 
 - `getUserMedia()` 只在用户点击后调用，只运行于 HTTPS/localhost。
-- 明确显示本地处理，不录制、不上传；离场、隐藏过久、选择完成、用户关闭时 stop 所有 tracks。
+- 明确显示本地处理，不录制、不上传；第一版摄像头全程运行（D-003），页面隐藏时暂停推理，页面关闭时释放。
 - 不把视频、landmarks、yaw、gaze、脸宽、逐帧坐标写日志、analytics、localStorage 或 Prompt。
 - 若未来需要统计，只发 coarse event：Track ID、输入方法、dwell bucket；需单独隐私评审。
 - HTML button 的焦点顺序、名称和 Enter/Escape 行为必须可用；canvas 本身不吞掉键盘通道。
@@ -319,7 +347,7 @@ type JourneyState = Readonly<{
 1. 序章只加载 Hub 三张卡片与轻量海面。
 2. 浏览器 idle 时可预取 WASM/model，但不启动摄像头。
 3. attention 第一名只预热首屏 poster、音频头和少量帧。
-4. armed 后提高目标优先级；确认后取消其他预取。
+4. resolved 后只预取胜者 Track 的首屏；其余取消。
 5. MediaPipe 约 24Hz，Three 前台最高 60Hz；不可见时暂停。
 6. 尽量复用一个 WebGL renderer；不为三卡片各建 canvas。
 7. DOM 未改变时不重绘 HTMLTexture；GPU transform 不触发 DOM snapshot。
@@ -340,27 +368,31 @@ type JourneyState = Readonly<{
 ### 12.2 输入与状态机
 
 - 摄像头允许/拒绝/撤销；没有人脸时 dwell 不增长。
-- 快速扫过不会选择；armed 后移开会取消。
+- 快速扫过只贡献很短的累计；冻结后移动不改结果。
 - 明亮、低光、背光、眼镜、45–90cm、多脸背景。
 - 三块卡片各选择 10 次的准确率、误选率、完成时间记录为实验数据。
-- 路演版只有 Track 3 能确认，Track 1/2 无法通过 click、keyboard 或 dwell 绕过。
+- Track 1/2 胜出进入 `memory-pending`，两个按钮路由正确；Track 3 胜出解锁滚动并进入 sirens。
 
 ### 12.3 生命周期
 
-- 章节退出 500ms 内调用 media track `stop()`（目标值，待实测）。
+- 页面关闭/`restart` 时调用 media track `stop()`；章节切换不停摄像头（D-003）。
 - animation frame、observer、event listener、geometry、material、texture 全部释放。
 - StrictMode mount/unmount 不重复打开摄像头。
 - 浏览器后退/刷新不把“已进入”误记为“已完成”。
 
 ## 13. 实施阶段
 
-| 阶段 | 范围 | 进入下一阶段的条件 |
-| --- | --- | --- |
-| P0 | 路演 release、StoryRouter/Director、真实 DOM 卡片、pointer/keyboard | 无 WebGL 走完 60 秒；只有 Track 3 可确认 |
-| P1 | capability adapter、HTMLTexture、Three scene、geometry sync | native/polyfill/dom 三路径可诊断且可交互 |
-| P2 | MediaPipe 头部方向、校准、dwell、隐私生命周期、shader 环、空间音频 | 拒绝权限仍完整；真实设备指标达标 |
+以 `docs/TASKS.md` 为准：
 
-不得在 P0 同时引入 Three、MediaPipe 与 Shader。先证明故事图和降级路径，再逐层开启增强，才能知道问题来自哪一层。
+| 任务卡 | 本文对应 | 进入下一步的条件 |
+| --- | --- | --- |
+| T2 Interaction | §5–§7：providers、`ZoneDwellSelector`、校准 | 单测通过；真实摄像头三区 250ms 内响应 |
+| T4 Mirrors | §8 的 DOM/CSS 3D 版本、`HtmlCanvasBridge` 接口 | 鼠标/键盘/假 `SelectionState` 驱动正确 |
+| I1 集成 | §9 与 Router 接线 | 60 秒占位版可选出 Track 3 与占位章 |
+| T14 HTML-in-Canvas | §3、§8 的 native/polyfill 路径 | 三路径可诊断且 Renderer 契约不变 |
+| T15 设备实测 | §7.5 全部参数 | 三镜各选 10 次的准确率、完成时间记录 |
+
+不在同一张卡里同时引入 Three、MediaPipe 与 Shader。
 
 ## 14. 已知、假设、待验证
 
@@ -373,17 +405,17 @@ type JourneyState = Readonly<{
 
 ### 设计假设
 
-- 首发主要面向桌面 Chromium；移动端使用触摸路径。
+- 只面向桌面 Chromium（D-008）。
 - 三个大横向目标适合头部方向而非精确眼动。
 - 原生能力失败时，视觉降级比功能阻断更可接受。
 
 ### 待真实验证
 
 - 用户本机 Chromium 的具体原语集合与 Three r185 实际兼容性。
-- `1.8s + 0.6s` 是否自然；迟滞边界是否适合卡片尺寸。
+- 5 秒累计窗口是否自然；迟滞边界是否适合镜面尺寸；纯累计的误选感受（§7.6）。
 - Polyfill 在中文字体、表单、动态状态和目标设备上的性能。
 - 眼镜、背光、低端设备下 MediaPipe 的净收益。
-- 用户是否理解“凝视确认”，是否需要一次性引导。
+- 用户是否理解“停留最久者胜出”，剧本中一行说明是否足够。
 
 ## 15. 来源
 

@@ -9,6 +9,8 @@
 > 目标：在不拆分船体、不增加分支序列的前提下，让头部、鼠标或键盘实时改变观众对斯库拉与卡律布狄斯的观看方式
 >
 > 架构边界：只消费 `SceneFrame` 与归一化 `InteractionFrame`；不改变 Road、帧号、船舶轨迹或故事结局
+>
+> 实现口径：TASKS T9（第二波）；`SequenceRenderer` 的 `head-coupled-peek` behavior 分支，不新增 Renderer key。仅桌面（D-008）。
 
 ## 1. 结论
 
@@ -163,7 +165,7 @@ pixels = render(frameIndex, peekX, effectStrength)
 - 关键船体、人物和字幕留白位于中央约 76% 安全宽度；
 - 左右探视到极限时不得露出空白边、编码黑边或未绘制区域；
 - 漩涡和斯库拉在中立画面仍能被辨认，探视负责增强而不是凭空创造；
-- 移动端若没有足够裁切余量，关闭 UV 平移，仅保留显影和声音。
+- 裁切余量不足时关闭 UV 平移，仅保留显影和声音。
 
 ### 5.3 允许的辅助层
 
@@ -225,7 +227,7 @@ Renderer 不读取 landmarks、摄像头视频或浏览器事件，只消费最�
 - `InteractionEngine`：归一和平滑输入，不知道斯库拉剧情。
 - `SceneRegistry`：从 `story.config` 解析探视生效窗口与 behavior。
 - `SequenceRenderer` / `ShaderRenderer`：在同次更新中消费 `SceneFrame` 和 `InteractionFrame`。
-- asset manifest：持有唯一主序列路径、poster、帧数与 desktop/mobile tier。
+- asset manifest：持有唯一主序列路径、poster、帧数与 tier（第一版只有 `desktop`，D-008）。
 
 这是一个新的 scene behavior，不是新的渲染生命周期，因此不应为了“头部探视”新增 Renderer key。
 
@@ -252,7 +254,7 @@ behavior: {
 - 键盘左右键或两个带可访问名称的“查看左侧/查看右侧”控制提供等价路径。
 - `prefers-reduced-motion` 下关闭 UV 平移和前景反向漂移，保留局部明暗、字幕与声音变化。
 - 所有输入失败时保持中立构图，固定序列仍能完整演到六名船员被夺走。
-- 页面隐藏、章节退出或正片结束时停止相关 provider 和音频自动化。
+- 页面隐藏时暂停推理；章节退出时释放本章音频自动化与 shader 资源，摄像头本身全程运行（D-003）。
 
 ## 10. 失败保护
 
@@ -312,7 +314,7 @@ behavior: {
 - 头部移动方向与画面取景方向是否符合多数体验者直觉。
 - 低光、眼镜、观看距离变化下的自然 dead zone。
 - 局部显影与空间音频是否足以让用户感知互动，而不需要更大的 UV 位移。
-- 移动端应该保留触摸探视还是直接播放中立版本。
+- 前倾 `z` 在笔记本摄像头位于屏幕下沿时与 `y` 的耦合程度（D-006 阈值是否需要按 y 修正）。
 
 ## 13. 对现有材料的影响
 

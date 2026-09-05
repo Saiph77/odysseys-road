@@ -1,11 +1,12 @@
 # 《归航 / NOSTOS》目标架构与开发规范
 
 > [Rebuilt by dev-trace init: 2026-09-05 from fresh repository scan]
-> 状态：设计草案，尚未实现
-> 范围：滚动叙事运行时、分支章节路由、多渲染层、HTML-in-Canvas、Three.js、MediaPipe、素材与 Prompt 管理
-> 权威材料：`docs/ROADSHOW_60S_CUT.md`、`docs/TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md`、`references/pear-no/src/`
-> 姊妹文档：`docs/PROMPT_SYSTEM_DESIGN.md`、`docs/reference/PEAR_ARCHITECTURE_AUDIT.md`
-> 更新日期：2026-09-05
+> 状态：设计已收敛，按 `docs/TASKS.md` 进入 MVP 实现
+> 范围：滚动叙事运行时、分支章节路由、多渲染层、神谕镜（DOM/CSS 3D，预留 HTML-in-Canvas + Three.js）、MediaPipe、素材与 Prompt 管理
+> 决策来源：`docs/DECISIONS.md`（与本文冲突时以它为准）
+> 权威材料：`docs/scripts/60s-roadshow/`、`docs/TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md`、`references/pear-no/src/`
+> 姊妹文档：`docs/TASKS.md`、`docs/PROMPT_SYSTEM_DESIGN.md`、`docs/reference/PEAR_ARCHITECTURE_AUDIT.md`
+> 更新日期：2026-09-05（V2：吸收 D-001…D-016）
 
 ## 0. 阅读地图
 
@@ -33,79 +34,58 @@
 | 类型 | 内容 | 证据/影响 |
 | --- | --- | --- |
 | 已确认 | 当前仓库只有文档和 Pear-no 参考快照，没有应用运行时 | 2026-09-05 仓库扫描 |
-| 已确认 | 当前只制作 60 秒路演；Hub 展示三 Track，仅 Track 3 可确认 | `ROADSHOW_60S_CUT.md` |
+| 已确认 | 当前只制作 60 秒路演；三镜均可胜出，Track 1/2 进入 `memory-pending` 占位章 | D-001 |
 | 已确认 | WICG API 仍位于 Chromium flag 后 | WICG README，2026-09-05 查询 |
 | 已确认 | Three.js r185 的 `HTMLTexture` 仍探测 `texElementImage2D` | Three.js r185 `WebGLTextures.js` |
 | 已确认 | WICG 当前说明使用 `texElementSubImage2D` | WICG README |
 | 设计决策 | 每个章节使用独立 Road，Router 负责动态播放顺序 | 避免为六种 Track 顺序制造全局 magic number |
 | 设计决策 | HTML-in-Canvas 经 capability adapter 接入 | 实验 API 改名不污染业务 Renderer |
 | 待验证 | 当前用户 Chromium 是否同时保留新旧 WebGL API | 实现阶段在目标浏览器运行 capability probe |
-| 待验证 | 头部停留阈值、低光准确率、移动端取舍 | 必须做真实用户测试，不在架构层宣称结论 |
+| 设计决策 | 只支持桌面 Chromium，不做移动端 | D-008 |
+| 设计决策 | 摄像头从 pre-roll 起全程运行 | D-003 |
+| 设计决策 | 主时间轴滚动驱动；选择窗口与一次性事件用真实时间 | D-005 |
+| 待验证 | 三区累计阈值、低光准确率 | 必须做真实用户测试，不在架构层宣称结论 |
 
 ## 2. 代码组织结构：组合优先，插件隔离
 
 ### 2.1 推荐目录（目标态）
 
+目录与任务卡的对应关系见 `docs/TASKS.md` §2；这里只列结构与职责。
+
 ```text
 odysseys-road/
-├── AGENTS.md
-├── README.md
-├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── ROADSHOW_60S_CUT.md
-│   ├── TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md
-│   ├── PROMPT_SYSTEM_DESIGN.md
-│   └── reference/
-├── prompts/
-│   ├── prompt.registry.ts          # 双语共享锁与场景变量的唯一维护源
-│   ├── README.md
-│   └── generated/                  # 可直接发送给不同 AI 的完整文件
-│       ├── zh/*.system.md
-│       └── en/*.system.md
-├── public/assets/
-│   ├── images/<asset-id>/<tier>/
-│   ├── sequences/<asset-id>/<tier>/
-│   ├── video/<asset-id>/<tier>/
-│   ├── audio/<asset-id>/
-│   └── models/
-├── scripts/
-│   ├── validate-assets.mjs
-│   ├── generate-prompts.mjs
-│   └── validate-prompts.mjs
+├── AGENTS.md · README.md
+├── docs/                          DECISIONS · TASKS · ARCHITECTURE · 技术设计 · scripts/ · reference/
+├── prompts/image-prompts/         双语图像 Prompt（将来接 prompt.registry.ts）
+├── public/
+│   ├── assets/{posters,sequences,video,audio}/<asset-id>/   只有 desktop tier（D-008）
+│   └── mediapipe/{wasm,models}/
 ├── src/
-│   ├── app/                        # React composition root；只接线
+│   ├── app/                       React composition root、PreRoll、MemoryPending、EndState；只接线
+│   ├── audio/                     AudioBus 接口 + NullAudioBus（D-009）
+│   ├── capabilities/              htmlInCanvas.ts：HtmlCanvasBridge 接口 + SemanticDomBridge（D-010）
+│   ├── components/                RendererStage、DevRoadPanel
 │   ├── config/
-│   │   ├── story.config.ts         # release profile、章节、Road、overlap、renderer、asset ref
-│   │   └── assets.manifest.ts      # 路径、帧数、tier、poster、预加载策略
-│   ├── content/                    # 字幕/旁白/可访问文本；不含 timing
+│   │   ├── story.config.ts        release、flow、章节、Road、blend、renderer key、asset ref、behavior
+│   │   ├── assets.manifest.ts     路径、帧数、poster、预加载策略
+│   │   └── interaction.config.ts  三区迟滞、窗口时长、平滑、置信度等全部交互阈值
+│   ├── content/                   字幕/旁白/镜面文案；不含 timing
 │   ├── core/
-│   │   ├── StoryRouter.ts          # 分支顺序与完成状态
-│   │   ├── StoryDirector.ts        # 输入进度 -> 当前章节 Road
-│   │   ├── SceneRegistry.ts        # Road -> SceneFrame[]
-│   │   ├── contracts.ts
+│   │   ├── contracts.ts           全部跨层 DTO 与接口（唯一真相源，改动须经集成者）
+│   │   ├── StoryRouter.ts         Track 路由与旅程状态
+│   │   ├── StoryDirector.ts       进度 → 章节局部 Road
+│   │   ├── SceneRegistry.ts       Road → active scenes + opacity
+│   │   ├── ProgressSource.ts      scroll（P0）| autopilot | debug
+│   │   ├── ScrollGate.ts          选择窗口期间锁滚动
+│   │   ├── ChapterRuntime.ts      章节生命周期 + 一次性 latch
 │   │   └── validateStory.ts
 │   ├── interaction/
-│   │   ├── InteractionEngine.ts    # 多输入归一、平滑、可信度
-│   │   ├── DwellController.ts      # 停留/确认状态机
-│   │   └── providers/              # pointer、keyboard、MediaPipe
-│   ├── capabilities/
-│   │   └── htmlInCanvas.ts         # 原生 API、版本适配、polyfill、fallback
-│   ├── renderers/
-│   │   ├── SequenceRenderer.ts
-│   │   ├── VideoRenderer.ts
-│   │   ├── DomRenderer.ts
-│   │   ├── ShaderRenderer.ts
-│   │   ├── ThreeHtmlRenderer.ts
-│   │   └── rendererRegistry.ts
-│   ├── components/
-│   │   ├── RendererStage.tsx
-│   │   └── DevRoadPanel.tsx
+│   │   ├── InteractionEngine.ts   多输入归一、平滑、丢脸回中
+│   │   ├── ZoneDwellSelector.ts   三区累计停留状态机（D-002）
+│   │   └── providers/             Pointer、Keyboard、MediaPipe
+│   ├── renderers/                 rendererRegistry · Sequence · Dom · OracleMirrors（+ 第二波 effects/）
 │   └── styles/
-└── tests/
-    ├── config.test.ts
-    ├── director.test.ts
-    ├── router.test.ts
-    └── interaction.test.ts
+└── tests/                         core/ · interaction/ · renderers/ · config/
 ```
 
 ### 2.2 执行包含树（谁创建、谁持有）
@@ -113,16 +93,19 @@ odysseys-road/
 ```text
 AppRoot  <<Root Aggregate / page lifetime>>
 ├── StoryRouter                  持有旅程级状态
-├── ChapterRuntime              当前章节生命周期
+├── ProgressSource + ScrollGate  滚动 → 0..1 进度；选择窗口期间锁住
+├── ChapterRuntime              当前章节生命周期，持有本章 latch
 │   ├── StoryDirector            无视觉状态
 │   ├── SceneRegistry            纯场景解析
+│   ├── ZoneDwellSelector?       只在 selection 章存在
 │   └── RendererStage
 │       └── SceneRenderer[*]     各自持有 GPU/Canvas/Media 私有资源
-├── InteractionEngine           持有实时交互样本
+├── InteractionEngine           持有实时交互样本，页面生命周期内常驻（D-003）
 │   ├── PointerProvider
 │   ├── KeyboardProvider
-│   └── MediaPipeProvider?       用户授权后才存在
-└── DevRoadPanel?               仅开发环境
+│   └── MediaPipeProvider?       pre-roll 授权成功后存在，直到页面关闭
+├── AudioBus                    第一版为 NullAudioBus
+└── DevRoadPanel?               仅 ?debug=1
 ```
 
 ### 2.3 代码依赖关系图
@@ -157,8 +140,10 @@ UI Host ──owns──> StoryRouter ──selects──> ChapterDefinition
 | 抽象 | P0 生产实现 | 可选/预留实现 | 必须降级到 |
 | --- | --- | --- | --- |
 | `SceneRenderer` | Sequence、DOM | Video、Shader、ThreeHtml | DOM/poster |
-| `InteractionProvider` | pointer、keyboard | MediaPipe head、head+gaze | pointer/keyboard |
-| `HtmlCanvasBridge` | 能力探测后选择 | WICG native、polyfill | semantic DOM |
+| `InteractionProvider` | pointer、keyboard、MediaPipe head | head+gaze（实验） | pointer/keyboard |
+| `HtmlCanvasBridge` | `SemanticDomBridge`（DOM/CSS 3D） | WICG native、polyfill（T14） | semantic DOM |
+| `ProgressSource` | scroll | autopilot、debug | scroll |
+| `AudioBus` | `NullAudioBus` | `WebAudioBus`（T13） | 无声 + 字幕 |
 | `ProgressStore` | memory/localStorage | URL/session adapter | 新旅程状态 |
 | `AssetLoader` | browser fetch/Image | cache/prefetch scheduler | poster/最近可用帧 |
 
@@ -168,7 +153,7 @@ UI Host ──owns──> StoryRouter ──selects──> ChapterDefinition
 | --- | --- | --- |
 | Strategy/Plugin | `rendererRegistry[key] -> SceneRenderer` | 更换渲染技术不改 Director |
 | Adapter | `htmlInCanvas`、各 `InteractionProvider` | 隔离浏览器 API 与输入设备差异 |
-| State Machine | `StoryRouter`、`DwellController` | 分支完成状态与停留确认可测试 |
+| State Machine | `StoryRouter`、`ZoneDwellSelector` | 分支状态与累计选择可测试 |
 | Staged Orchestrator | App → Router/Director/Registry/Stage | 保留阶段接缝，不制造上帝组件 |
 | Immutable DTO | `DirectorFrame`、`SceneFrame`、`InteractionFrame` | 跨层只传数据，不共享可变内部状态 |
 
@@ -182,7 +167,8 @@ UI Host ──owns──> StoryRouter ──selects──> ChapterDefinition
 | road、dominant scene | `StoryDirector` 输出帧 | 单次 update | React 全局 store |
 | active scenes、opacity | `SceneRegistry` 计算 | 单次 update | Renderer 常量 |
 | pointer/head/gaze 样本 | `InteractionEngine` | 实时 session | Router/localStorage |
-| dwell/armed/selected | `DwellController` | 一次选择仪式 | MediaPipe provider |
+| zone/dwellMs/winner | `ZoneDwellSelector` | 一次选择窗口 | MediaPipe provider、Renderer |
+| 一次性事件是否已触发 | `ChapterRuntime` latch | 单章 | Renderer |
 | texture、video、GPU buffer、最近帧 | 各 Renderer | scene mount→destroy | Director/App |
 | 文件路径与 tier | asset manifest | build/config | JSX/Renderer |
 
@@ -192,8 +178,9 @@ UI Host ──owns──> StoryRouter ──selects──> ChapterDefinition
 
 ```text
 window scroll / DevRoadPanel seek
-  -> ScrollInputAdapter.normalize()
-  -> StoryDirector.frame(progress)
+  -> ProgressSource (scroll | debug) -> rawProgress 0..1
+  -> ScrollGate.clamp(rawProgress)        // 选择窗口期间钳制在 gate
+  -> StoryDirector.fromProgress(progress)
   -> SceneRegistry.resolve(road)
   -> DirectorFrame { road, sceneId, activeScenes[] }
   -> RendererStage.update(frame)
@@ -208,15 +195,15 @@ pointer / keyboard / camera (需用户授权)
   -> InteractionProvider.sample()
   -> InteractionEngine.normalize + smooth
   -> InteractionFrame
-  -> DwellController.update()
-       ├── preview/ranking -> ThreeHtmlRenderer visual feedback
-       └── confirmed TrackId -> StoryRouter.selectTrack(trackId)
-                                   -> destroy current ChapterRuntime
-                                   -> create selected ChapterRuntime
-                                   -> Road 从该章节 timeline.start 开始
+  -> ZoneDwellSelector.update(frame, dtMs)       // 真实时间，D-002
+       ├── SelectionState{zone, dwellMs} -> OracleMirrorsRenderer 视觉反馈
+       └── phase=resolved, winnerId -> StoryRouter.selectTrack(winnerId)
+                                   -> winner ∈ enabledTrackIds ? Track 章节序列 : memory-pending
+                                   -> ScrollGate.unlock()
+                                   -> 用户继续向下滚动进入新章节
 ```
 
-关键 handoff：只有 `DwellController` 可以把“关注”升级成“确认”；只有 `StoryRouter` 可以把 Track ID 升级成章节切换。MediaPipe、Three.js Mesh 和 HTML button 都不能直接改 `completedTrackIds`。
+关键 handoff：只有 `ZoneDwellSelector` 能产出 `winnerId`（pointer click / Enter 通过它的 `confirm()` 走同一出口）；只有 `StoryRouter` 能把 Track ID 变成章节切换。MediaPipe、DOM button 都不能直接改旅程状态。
 
 ### 3.3 资源加载异步边界
 
@@ -254,7 +241,7 @@ Scene destroy
 2. 同一输入比例经 scroll 或 debug seek 必须得到相同 Road 和 SceneFrame。
 3. Track 只有完成后才写入 `completedTrackIds`；进入或刷新不等于完成。
 4. 任意 Track 顺序都在同一 Hub 汇合；Track 之间不建立两两转场。
-5. 页面隐藏、章节离开或选择确认时，摄像头与动画循环必须停止。
+5. 页面隐藏时暂停推理与动画循环；摄像头本身从 pre-roll 起全程运行到页面关闭（D-003），第一版不按章启停。
 6. Shader/WebGL/摄像头失败不能阻断完整叙事。
 7. 任何生物特征派生原始数据不得持久化、上报或进入 Prompt。
 
@@ -296,40 +283,131 @@ RawPointer | RawKeyboard | MediaPipeLandmarks(private)
 
 ### 5.1 关键接口（目标 TypeScript）
 
+以下是 `src/core/contracts.ts` 的目标内容。字段增删须经集成者（D-015）。
+
 ```ts
+// ---- 进度与场景 ----
+type ProgressSourceKind = 'scroll' | 'autopilot' | 'debug';
+
+interface ProgressSource {
+  readonly kind: ProgressSourceKind;
+  start(publish: (rawProgress: number) => void): void;   // 0..1
+  stop(): void;
+}
+
+interface ScrollGate {
+  lock(atProgress: number): void;   // 钳制并拦截滚轮
+  unlock(): void;
+  clamp(rawProgress: number): number;
+}
+
 type SceneDefinition = Readonly<{
   id: string;
   road: Readonly<{ start: number; end: number }>;
   blend: Readonly<{ in: number; out: number }>;
   layer: number;
-  renderer: 'sequence' | 'video' | 'dom' | 'shader' | 'three-html';
+  renderer: 'sequence' | 'dom' | 'mirrors' | 'video' | 'shader';
   asset?: string;
-  behavior?: Readonly<Record<string, unknown>>;
+  behavior?: Readonly<Record<string, unknown>>;  // 如 { interaction: 'head-coupled-peek', maxUvOffset: 0.035 }
 }>;
 
 type ChapterDefinition = Readonly<{
   id: string;
-  kind: 'linear' | 'hub' | 'track' | 'finale';
-  timeline: Readonly<{ start: number; end: number }>;
-  scroll: Readonly<{ screens: { desktop: number; mobile: number } }>;
+  kind: 'linear' | 'hub' | 'track' | 'finale' | 'placeholder';
+  timeline: Readonly<{ start: number; end: number }>;   // 章节局部 Road 范围
+  scroll: Readonly<{ screens: number }>;                // 只有桌面（D-008）
+  gate?: Readonly<{ atRoad: number }>;                  // hub 章：滚到此处进入真实时间选择窗口
   scenes: readonly SceneDefinition[];
 }>;
 
+type DirectorFrame = Readonly<{
+  chapterId: string;
+  road: number;
+  source: ProgressSourceKind;
+  activeScenes: readonly SceneFrame[];
+}>;
+
+type SceneFrame = Readonly<{
+  sceneId: string;
+  renderer: SceneDefinition['renderer'];
+  localProgress: number;   // 0..1
+  opacity: number;
+  layer: number;
+  asset?: string;
+  behavior?: Readonly<Record<string, unknown>>;
+}>;
+
 interface StoryDirector {
-  fromScroll(scrollTop: number, maxScroll: number): DirectorFrame;
-  fromRoad(road: number, source?: 'debug'): DirectorFrame;
-  scrollTopForRoad(road: number, maxScroll: number): number;
+  fromProgress(rawProgress: number, source?: ProgressSourceKind): DirectorFrame;
+  fromRoad(road: number): DirectorFrame;
 }
 
+// ---- 交互 ----
+type InteractionFrame = Readonly<{
+  x: number;          // 头/指针在视口的水平位置，-1..1
+  y: number;
+  z: number;          // 相对校准基线的靠近程度；前倾为正
+  yaw: number;        // 头部水平转角归一化，-1..1；指针来源为 0
+  focusX: number;     // 位置与 yaw 融合后的"看向哪里"，-1..1；选择与探视都用它
+  confidence: number; // 0..1
+  detected: boolean;
+  source: 'pointer' | 'keyboard' | 'head';
+  timestamp: number;
+}>;
+
+interface InteractionProvider {
+  readonly source: InteractionFrame['source'];
+  start(publish: (sample: InteractionFrame) => void, confirm: () => void): Promise<void> | void;
+  stop(): void;
+}
+
+type Zone = 'left' | 'center' | 'right';
+
+type SelectionState = Readonly<{
+  phase: 'idle' | 'collect' | 'freeze' | 'resolved';
+  zone: Zone | null;
+  dwellMs: Readonly<Record<Zone, number>>;
+  elapsedMs: number;
+  winnerId: string | null;   // track-a | track-b | track-c
+}>;
+
+interface ZoneDwellSelector {
+  begin(): void;                                          // 进入 collect
+  update(frame: InteractionFrame, dtMs: number): SelectionState;
+  confirm(zone: Zone): SelectionState;                    // click / Enter：立即 resolved
+  readonly state: SelectionState;
+}
+
+// ---- 渲染 ----
 interface SceneRenderer {
   mount(host: HTMLElement, context: RendererContext): void | Promise<void>;
-  update(scene: SceneFrame, interaction: InteractionFrame): void;
+  update(scene: SceneFrame, interaction: InteractionFrame, selection?: SelectionState): void;
   destroy(): void;
 }
 
-interface InteractionProvider {
-  start(publish: (sample: InteractionSample) => void): Promise<void> | void;
-  stop(): void;
+type RendererContext = Readonly<{
+  assets: AssetManifest;
+  content: ContentRegistry;
+  latch: (id: string) => boolean;   // ChapterRuntime.fireOnce；首次返回 true
+  audio: AudioBus;
+  reducedMotion: boolean;
+}>;
+
+// ---- 神谕镜 / HTML-in-Canvas（D-010）----
+interface HtmlCanvasBridge {
+  readonly mode: 'dom' | 'polyfill' | 'native';
+  mount(host: HTMLElement, elements: readonly HTMLElement[]): void;
+  updateGeometry(elementId: string, transform: DOMMatrix): void;
+  requestPaint(elementId: string): void;
+  destroy(): void;
+}
+
+// ---- 音频（D-009）----
+interface AudioBus {
+  load(stemId: string): Promise<void>;
+  play(stemIds: readonly string[], opts?: { syncAt?: number; loop?: boolean }): void;
+  setMix(params: Readonly<Record<string, number>>): void;   // 如 { sirensLeft: 0.8, sirensRight: 0.2 }
+  stop(stemIds?: readonly string[]): void;
 }
 ```
 
@@ -340,45 +418,50 @@ export const storyConfig = {
   release: {
     id: 'roadshow-60s',
     targetDurationSeconds: 60,
-    enabledTrackIds: ['chapter-c'],
-    disabledChoiceBehavior: 'preview-only'
+    enabledTrackIds: ['track-c'],
+    disabledChoiceBehavior: 'placeholder',   // D-001：可胜出，落到 placeholderChapterId
+    placeholderChapterId: 'memory-pending',
+    defaultTrackId: 'track-c'                // D-002：无输入时"海替你决定"
   },
   flow: {
-    entry: 'intro',
-    hub: 'chapter-hub',
-    choices: ['chapter-a', 'chapter-b', 'chapter-c'],
-    finale: 'outro'
+    entry: 'troy',
+    hub: 'selection',
+    tracks: {
+      'track-a': [],                          // 未制作
+      'track-b': [],
+      'track-c': ['sirens', 'scylla', 'cattle']
+    },
+    finale: 'homecoming'
   },
   chapters: [
     {
-      id: 'intro',
+      id: 'troy',
       kind: 'linear',
-      timeline: { start: 0, end: 1200 },
-      scroll: { screens: { desktop: 6, mobile: 7 } },
+      timeline: { start: 0, end: 1000 },
+      scroll: { screens: 4 },
       scenes: [
-        {
-          id: 'intro-a',
-          road: { start: 0, end: 700 },
-          blend: { in: 0, out: 140 },
-          layer: 10,
-          renderer: 'sequence',
-          asset: 'intro-sequence'
-        },
-        {
-          id: 'intro-b',
-          road: { start: 560, end: 1200 },
-          blend: { in: 140, out: 0 },
-          layer: 20,
-          renderer: 'video',
-          asset: 'intro-video'
-        }
+        { id: 'troy-horse', road: { start: 0, end: 600 }, blend: { in: 0, out: 120 }, layer: 10, renderer: 'sequence', asset: 'troy-sequence' },
+        { id: 'troy-captions', road: { start: 0, end: 1000 }, blend: { in: 0, out: 0 }, layer: 50, renderer: 'dom' },
+        { id: 'troy-crack-to-sea', road: { start: 480, end: 1000 }, blend: { in: 120, out: 0 }, layer: 20, renderer: 'sequence', asset: 'crack-to-sea' }
+      ]
+    },
+    {
+      id: 'selection',
+      kind: 'hub',
+      timeline: { start: 0, end: 1000 },
+      scroll: { screens: 4 },
+      gate: { atRoad: 250 },                  // 镜升起后锁滚动，进入真实时间 5s 窗口
+      scenes: [
+        { id: 'selection-sea', road: { start: 0, end: 1000 }, blend: { in: 0, out: 0 }, layer: 10, renderer: 'sequence', asset: 'sea-hub' },
+        { id: 'selection-mirrors', road: { start: 0, end: 1000 }, blend: { in: 150, out: 0 }, layer: 30, renderer: 'mirrors' }
       ]
     }
+    // sirens / scylla / cattle / homecoming / memory-pending 由 T6 填写
   ]
 } as const;
 ```
 
-`release.enabledTrackIds` 控制当前可确认的 Track。路演版显示三张卡，但只有 `chapter-c`（Track 3）可确认；将来开放 Track 1/2 只改 release profile，不改 Renderer 或凝视算法。
+`release.enabledTrackIds` 控制哪些 Track 有真实后续章节；不在其中的胜者路由到 `placeholderChapterId`。将来开放 Track 1/2 只改 `enabledTrackIds` 与 `flow.tracks`，不改 Renderer 或选择算法。
 
 Road 是章节局部逻辑时间。Router 决定当前章节，Director 决定章节内的场景进度。
 
@@ -391,10 +474,14 @@ Road 是章节局部逻辑时间。Router 决定当前章节，Director 决定�
 - 未注册 Renderer；
 - 缺失 asset ref；
 - flow 指向不存在章节；
-- release 启用不属于 flow choices 的 Track，或 preview-only 卡片仍可确认；
-- Hub choices 重复、已完成 Track 仍可被主线选择。
+- `enabledTrackIds`、`defaultTrackId` 不是 `flow.tracks` 的 key；`placeholderChapterId` 不存在；
+- `enabledTrackIds` 中的 Track 章节列表为空，或 `flow.tracks` 引用不存在章节；
+- hub 章缺 `gate` 或 `gate.atRoad` 越界；
+- 非 hub 章带 `gate`。
 
 ## 6. HTML-in-Canvas + Three.js + MediaPipe
+
+> 第一版口径（D-010）：神谕镜走 `SemanticDomBridge`（真实 DOM + CSS 3D）。本节描述的原生/polyfill 路径是同一 `HtmlCanvasBridge` 契约下的第二波任务（T14），不阻塞 MVP。
 
 ### 6.1 正确的能力模型
 
@@ -429,13 +516,13 @@ detect at runtime
 
 ```text
 Scroll -> StoryDirector -> SceneFrame -------------------┐
-                                                         ├-> ThreeHtmlRenderer
+                                                         ├-> OracleMirrorsRenderer（经 HtmlCanvasBridge）
 Camera -> MediaPipe -> InteractionEngine -> InteractionFrame ┘
 HTML subtree -> HtmlCanvasBridge -> HTMLTexture -> Mesh
 Mesh projection -> geometry sync -> DOM hit testing
 ```
 
-MediaPipe 只输出 `x/y/z/confidence/source/detected/timestamp`。Renderer 可以用它做视差；DwellController 可以用它做停留；Director 对摄像头完全无知。
+MediaPipe 只输出 `x/y/z/yaw/focusX/confidence/source/detected/timestamp`。Renderer 可以用它做视差；`ZoneDwellSelector` 用它做三区累计；Director 对摄像头完全无知。
 
 ### 6.4 可访问性和隐私
 
@@ -443,7 +530,7 @@ MediaPipe 只输出 `x/y/z/confidence/source/detected/timestamp`。Renderer 可�
 - 不录制、不上传、不保存视频帧、landmarks、脸宽、yaw、逐帧轨迹。
 - 不可见 HTML subtree 必须 `inert`/`aria-hidden` 或移除，避免 ghost content。
 - 跨域图片、iframe、visited link、spellcheck/autofill preview 等原生绘制受隐私限制；资产默认同源。
-- pointer、touch、keyboard 使用相同选择状态机；点击可立即确认，不强制等待凝视时长。
+- pointer、keyboard 使用相同选择状态机（`ZoneDwellSelector`）；点击 / Enter 通过 `confirm()` 立即结束窗口。
 
 详见 `TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md`。
 
@@ -453,12 +540,12 @@ MediaPipe 只输出 `x/y/z/confidence/source/detected/timestamp`。Renderer 可�
 
 | 阶段 | 只做什么 | 验收标准 |
 | --- | --- | --- |
-| MVP | release/config validator、Router、Director、DOM/色块、Road panel | 60 秒路演六章可达；只允许 Track 3；scroll/debug 同帧；无 WebGL 也能走完全程 |
-| Sequence | manifest、帧加载、最近帧 fallback、tier | 首/中/尾帧正确；快速 seek 无黑帧；mobile 构图可读 |
+| MVP（TASKS T0–T7 + I1） | validator、Router、Director、ProgressSource/ScrollGate、ZoneDwellSelector、DOM/色块、DOM 神谕镜、PreRoll、Road panel | 60 秒六章 + 占位章可达；三区累计选择可用；scroll/debug 同帧；无 WebGL 走完全程 |
+| Sequence | manifest、帧加载、最近帧 fallback | 首/中/尾帧正确；快速 seek 无黑帧 |
 | Overlap | registry 统一计算 active/opacity | 交界前/中/后无 gap；Renderer 无 handoff 常量 |
 | DOM | 旁白、字幕、导航、无障碍 | 键盘可达；screen reader 语义稳定；reduced motion 可用 |
-| Three HTML | 原生/polyfill/DOM 三路径 | button/input 原生交互；旋转时 hit testing 对齐；API 状态可诊断 |
-| MediaPipe | 头部方向、dwell、隐私生命周期 | 拒绝权限仍完整；离场轨道停止；无脸不累计 |
+| Three HTML（T14） | native/polyfill 接入既有 `HtmlCanvasBridge` | button 原生交互；旋转时 hit testing 对齐；API 状态可诊断 |
+| MediaPipe（T2/T15） | 头部方向、校准、三区累计、隐私 | 拒绝权限仍完整；无脸不累计；全程运行不泄漏 |
 | Shader | 只做已批准润色 | context loss 有 fallback；不改 Road/Router；性能预算通过 |
 
 ### 7.2 加、改、删章节
@@ -486,12 +573,11 @@ MediaPipe 只输出 `x/y/z/confidence/source/detected/timestamp`。Renderer 可�
 ### 7.4 素材接入
 
 ```text
-public/assets/sequences/<asset-id>/
-├── desktop/frame-0001.webp
-└── mobile/frame-0001.webp
+public/assets/sequences/<asset-id>/desktop/frame-0001.webp
+public/assets/posters/<asset-id>.webp
 ```
 
-接入前检查：命名连续、大小写、首/中/尾帧、自然尺寸、色彩空间、cover anchor、前章尾帧与后章首帧构图、poster/fallback、许可来源。共享同一 tier 也必须在 manifest 显式声明。
+第一版只有 `desktop` tier（D-008）；`tier` 字段保留以便扩展。接入前检查：命名连续、大小写、首/中/尾帧、自然尺寸、色彩空间、cover anchor、前章尾帧与后章首帧构图对齐、poster/fallback、许可来源。
 
 ### 7.5 转场分类
 
@@ -508,7 +594,7 @@ public/assets/sequences/<asset-id>/
 
 可交给 Agent：按契约实现 Renderer、loading/fallback/cleanup、确定性 GLSL、validator、fixture、资产/Prompt 生成和一致性测试。
 
-必须由人或架构层复核：Road 表、Track 顺序、章节身份、handoff、移动端构图、无障碍、摄像头文案与隐私、素材许可、角色与世界观锁定。
+必须由人或架构层复核：Road 表、Track 顺序、章节身份、handoff、无障碍、摄像头文案与隐私、雷击亮度与时长、素材许可、角色与世界观锁定。
 
 Agent 提交 timing 变化时必须展示 config diff；禁止用藏在 JSX、CSS、GLSL 的阈值“修好”视觉偏差。项目级细则见根目录 `AGENTS.md`。
 
@@ -516,31 +602,37 @@ Agent 提交 timing 变化时必须展示 config diff；禁止用藏在 JSX、CS
 
 ### 8.1 视觉系统草案
 
-| Token | 值 | 角色 |
+采用剧本 01 §4 的美术方向（D-012）：镜外世界近黑、低饱和、安静；镜内世界高饱和油画 + 真实 HTML 字体。
+
+| Token | 值（初始，T4 可调） | 角色 |
 | --- | --- | --- |
-| `cerulean` | `#1D5FA8` | 广阔天空、方向感 |
-| `deep-sea` | `#0A3152` | 海与界面底色 |
-| `aged-gold` | `#B58A3C` | 选择进度、稀缺强调 |
-| `marble` | `#E6D8BD` | HTML 航海铭牌 |
-| `oxblood` | `#6D2E2B` | 代价/危险，不作为普通 CTA |
-| `charcoal` | `#15120F` | 字体与阴影 |
+| `sea-black` | `#070B10` | 选择页与全片底色 |
+| `deep-sea` | `#0A2238` | 海面暗部、界面底 |
+| `horizon` | `#6E8FA6` | 低亮海平线、星点 |
+| `bronze` | `#8A6A3A` | 神谕镜边框主色 |
+| `verdigris` | `#4F7A6A` | 边框绿锈、盐蚀 |
+| `aged-gold` | `#C9A45C` | 金纹闭合、稀缺强调 |
+| `ivory` | `#E9E1CF` | 镜内正文、占位章石灰白 |
+| `oxblood` | `#6D2E2B` | 代价/危险，不作普通 CTA |
 
-字体策略：正文优先高可读本地 serif（Iowan Old Style/Palatino/Source Han Serif 回退），控制和数据用克制 sans；不依赖网络字体完成首屏。标题不是装饰性全大写，希腊文只在真实叙事标识中出现。
+三 Track 色板（镜内）：I 孔雀蓝/赭石/暗金；II 酒红/紫黑/冷银；III 群青/象牙白/太阳金。
 
-唯一高记忆点是海平线上三块可交互真实 HTML 铭牌：
+字体：正文优先本地 serif（Iowan Old Style / Palatino / Source Han Serif 回退），控件用克制 sans；不依赖网络字体完成首屏。希腊文只在真实叙事标识中出现。
 
 ```text
-┌────────────────────────── flat cerulean sky ──────────────────────────┐
-│                           叙事提示 / 留白                              │
-│        ╱ card A ╲          │ card B │          ╱ card C ╲             │
-│       real HTML             selected Z-depth       real HTML           │
-│──────────────────────────── sea horizon ──────────────────────────────│
-│                        small persistent ship                          │
-│ [quiet route/status]                         [consent/fallback action] │
-└────────────────────── dev Road panel (development only) ──────────────┘
+┌──────────────────────── near-black Aegean, sparse stars ────────────────────────┐
+│                                                                                  │
+│      ╭──────╮            ╭──────╮             ╭──────╮                          │
+│      │  I   │            │  II  │             │ III  │   青铜边框、窄高、弧面   │
+│      │ real │            │ real │             │ real │   左右镜朝中心内扣       │
+│      │ HTML │            │ HTML │             │ HTML │   目标镜前移·放大·转正   │
+│      ╰──────╯            ╰──────╯             ╰──────╯                          │
+│────────────────────────── low-luminance horizon ─────────────────────────────────│
+│  看向一段命运。海会替你记住停留。                       方向仅在本机即时计算。   │
+└──────────────────────────── dev Road panel (?debug=1) ───────────────────────────┘
 ```
 
-避免三项模板化倾向：不做等宽 SaaS 圆角卡片网格；不在每段堆“标签 + 大标题 + 渐变”；不为所有元素添加自动 fade-up。运动只响应滚动、视差、选择和确认。
+避免：等宽 SaaS 圆角卡片网格；每段"标签 + 大标题 + 渐变"；全元素自动 fade-up；百分比/倒计时数字。运动只响应滚动、头部/指针、累计与胜出。
 
 ### 8.2 自动检查
 
@@ -549,11 +641,12 @@ Agent 提交 timing 变化时必须展示 config diff；禁止用藏在 JSX、CS
 ### 8.3 人工验收清单
 
 - 每章开始/中点/结束；每个 overlap 前/中/后；快速滚动与连续 seek。
-- 390×844 与至少一个桌面视口；desktop/mobile tier 和 crop。
-- 键盘、pointer、touch、reduced motion；摄像头拒绝/撤销/无人脸。
+- 1920×1080 与 1440×900 两档桌面视口（D-008）。
+- 键盘、pointer、reduced motion；摄像头拒绝/撤销/无人脸。
 - 原生、polyfill、DOM fallback 三条路径；HTML input/button、focus、hit testing。
-- 路演版 Track 1/2 只反馈不可确认，Track 3 确认后进入 finale。
-- 生产 preview；context loss；离开选择页后摄像头灯与 track 状态。
+- Track 1/2 胜出进入 `memory-pending` 且两个按钮可用；Track 3 胜出后滚动进入 sirens 并最终到 homecoming。
+- 选择窗口内滚轮被锁；resolved 后解锁；无输入 5s 落到 Track 3。
+- 生产 preview；context loss；雷击只触发一次。
 
 ### 8.4 变更影响速查
 
@@ -568,11 +661,12 @@ Agent 提交 timing 变化时必须展示 config diff；禁止用藏在 JSX、CS
 
 ### 8.5 路线图
 
-- **P0：60 秒路演骨架。** release/config/manifest、Router/Director/Registry、六章 Road、Sequence placeholder、DOM、Road panel、Track 3 单路径与降级导航。
-- **P1：空间选择。** ThreeHtmlRenderer、native/polyfill/DOM bridge、interaction engine、pointer/keyboard、真实 HTML hit testing。
-- **P2：感知与路演润色。** 按需 MediaPipe、dwell UX、Video/Shader、空间音频、头部探视、性能预算和视觉回归。
+路线图已细化为任务卡，见 `docs/TASKS.md`：
 
-停止条件：任何 P2 效果都不得迫使 P0 的 story schema、Router/Director 边界或 Renderer 生命周期重写。
+- **第一波（T0–T7 → I1）**：60 秒占位版跑通——validator、Router/Director、ProgressSource/ScrollGate、ZoneDwellSelector、pointer/keyboard/MediaPipe、Sequence 占位、DOM 字幕、DOM/CSS 神谕镜、PreRoll、占位章、结束态、Prompt 重写。
+- **第二波（T8–T15）**：塞壬显影、UV 探视、牛群与前倾、雷击 latch 与残影、autopilot、WebAudioBus、HTML-in-Canvas native/polyfill、设备实测调参。
+
+停止条件不变：任何第二波效果都不得迫使 story schema、Router/Director 边界或 Renderer 生命周期重写。
 
 ## 9. 来源与验证入口
 
@@ -595,4 +689,4 @@ Agent 提交 timing 变化时必须展示 config diff；禁止用藏在 JSX、CS
 
 ## 10. 最易混淆的五件事
 
-`StoryRouter` 选章节，`StoryDirector` 只管章节内 Road；HTML-in-Canvas 原生路径保留真实 DOM，html2canvas 只是像素回退；Three.js 管空间与材质，MediaPipe 只提供低维输入；视觉行为与章节 config 不互相拥有。
+`StoryRouter` 选章节，`StoryDirector` 只管章节内 Road；选择窗口是真实时间、其余都是滚动（D-005）；神谕镜第一版就是真实 DOM + CSS 3D，HTML-in-Canvas / Three 只是同一契约下的增强路径；MediaPipe 只提供低维输入且全程运行；视觉行为与章节 config 不互相拥有。

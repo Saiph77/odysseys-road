@@ -6,6 +6,13 @@
 > 前置接口：`18.5–20.0s` Track 3 神谕镜中的白色声波突破边框，本稿从声波铺满海面开始
 > 上篇衔接：[`01_OPENING_AND_SELECTION_SCRIPT.md`](01_OPENING_AND_SELECTION_SCRIPT.md)
 
+> **实现口径（2026-09-05，集成者附注，不改动下文剧本）**：
+> - 第一版 MVP 四章均为占位画面 + 字幕；§4–§7 的显影、UV 探视、牛群靠近、雷击残影分别是 TASKS T8–T11。
+> - 音频（含 §4 塞壬双声部）第一版只预留 `AudioBus` 接口，不出声（D-009）；字幕承担全部信息。
+> - 前倾"触碰"：`z > 0.35` 持续 ≥300ms 触发一次，pointer down / Enter 等价（D-006）。
+> - 雷击：单帧、亮度上限约 85%、每次会话一次；reduced-motion 改 120ms 柔和爬升（D-007）。
+> - 摄像头全程运行（D-003）；结束态停在海浪循环并提供克制的「重新开始」（D-011）；不做移动端（D-008）。
+
 ---
 
 ## 1. 一句话命题
@@ -353,7 +360,7 @@ Track 3 白色声波
 - `scylla-charybdis`：一条固定叙事主序列；中央船体、左漩涡、右峭壁同时存在。
 - `cattle`：至少支持牛群靠近、最近牛转头、太阳下落三个连续动作；篝火与黎明需要 match-cut 对齐点。
 - `shipwreck`：晴空航行首帧、单帧雷击、已裂船体、风暴吞没、奥德修斯抓断桅、伊萨卡尾帧。
-- 所有关键动作必须在中央安全区可读；移动端不足以横向裁切时，关闭 UV 平移而非露出画外空白。
+- 所有关键动作必须在中央安全区可读；素材裁切余量不足时，关闭 UV 平移而非露出画外空白。
 
 ### 音频素材
 
@@ -405,7 +412,7 @@ Track 3 白色声波
 - [`ROADSHOW_60S_CUT.md`](../../ROADSHOW_60S_CUT.md)：60 秒六章结构与第一版只开放 Track 3。
 - [`HEAD_COUPLED_PEEK_TECHNICAL_DESIGN.md`](../../HEAD_COUPLED_PEEK_TECHNICAL_DESIGN.md)：单序列探视边界、输入降级和素材安全区。
 - [`TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md`](../../TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md)：头部方向、停留状态、隐私与 HTML-in-Canvas 边界。
-- [`ODYSSEY_INTERACTIVE_SCRIPT.md`](../../ODYSSEY_INTERACTIVE_SCRIPT.md)：长版人物、声音和叙事母题。
+- 人物、船只与色板锁定：见 `prompts/image-prompts/` 各文件的「系统风格」段（奥德修斯 42 岁爱琴海国王、深色雪松木长船、天青蓝/象牙白/旧金/牛血红/炭黑色板）；叙事母题（圆环 = 诱惑、竖线 = 代价、水平线 = 归途）以本稿 §8 为准。
 - [`image-prompts/README.md`](../../../prompts/image-prompts/README.md)：Track 3 与终章现有美术素材 Prompt 索引。
 
 ### 原典与技术能力入口
