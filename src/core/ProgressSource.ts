@@ -3,11 +3,15 @@ import { mapScrollProgress, rawProgressFromMapped } from './timeline';
 
 type Publish = (rawProgress: number) => void;
 
+let seekTarget: { progress: number; top: number } | null = null;
+
 function readScrollProgress(): number {
   const stage = document.querySelector<HTMLElement>('.stage');
   if (!stage) return 0;
   const maxScroll = stage.scrollHeight - window.innerHeight;
   if (maxScroll <= 0) return 0;
+  if (seekTarget && Math.abs(window.scrollY - seekTarget.top) < 1) return seekTarget.progress;
+  seekTarget = null;
   return mapScrollProgress(window.scrollY / maxScroll);
 }
 
@@ -69,5 +73,8 @@ export function scrollToProgress(progress: number) {
   const stage = document.querySelector<HTMLElement>('.stage');
   if (!stage) return;
   const maxScroll = stage.scrollHeight - window.innerHeight;
-  window.scrollTo({ top: Math.max(0, maxScroll) * rawProgressFromMapped(progress), behavior: 'auto' });
+  const rawProgress = rawProgressFromMapped(progress);
+  const top = Math.max(0, maxScroll) * rawProgress;
+  seekTarget = { progress: mapScrollProgress(rawProgress), top };
+  window.scrollTo({ top, behavior: 'auto' });
 }

@@ -70,4 +70,22 @@ describe('ScrollProgressSource', () => {
     scrollToProgress(progress);
     expect(browser.scrollTo).toHaveBeenCalledWith({ top, behavior: 'auto' });
   });
+
+  it('preserves exact seek intent across CSS pixel quantization, then resumes real scrolling', () => {
+    vi.stubGlobal('document', { querySelector: () => ({ scrollHeight: 26182 }) });
+    browser.innerHeight = 654;
+    browser.scrollTo.mockImplementation(({ top }: { top: number }) => { browser.scrollY = top - 0.02; });
+    const publish = vi.fn();
+    const source = new ScrollProgressSource();
+    source.start(publish);
+    scrollToProgress(0.65);
+    browser.dispatchEvent(new Event('scroll'));
+    scheduled!(0);
+    expect(publish).toHaveBeenLastCalledWith(0.65);
+    browser.scrollY -= 10;
+    browser.dispatchEvent(new Event('scroll'));
+    scheduled!(0);
+    expect(publish).toHaveBeenLastCalledWith(browser.scrollY / (26182 - 654));
+    source.stop();
+  });
 });
