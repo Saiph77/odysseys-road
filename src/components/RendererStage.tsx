@@ -5,6 +5,10 @@ import { createRenderer } from '../renderers/rendererRegistry';
 type MountEntry = {
   host: HTMLDivElement;
   renderer: ReturnType<typeof createRenderer>;
+  ready: boolean;
+  active: boolean;
+  scene: SceneFrame;
+  interaction: InteractionFrame;
 };
 
 function sceneKey(scene: SceneFrame) {
@@ -24,14 +28,16 @@ export function RendererStage({
   const mountsRef = useRef<Map<string, MountEntry>>(new Map());
 
   useEffect(() => {
+    const mounts = mountsRef.current;
     return () => {
-      for (const entry of mountsRef.current.values()) {
+      for (const entry of mounts.values()) {
+        entry.active = false;
         entry.renderer.destroy();
         entry.host.remove();
       }
-      mountsRef.current.clear();
+      mounts.clear();
     };
-  }, []);
+  }, [context]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -52,19 +58,34 @@ export function RendererStage({
         host.style.zIndex = String(scene.layer);
         root.appendChild(host);
         const renderer = createRenderer('dom');
-        void Promise.resolve(renderer.mount(host, context)).then(() => {
-          renderer.update(scene, interaction);
-        });
-        entry = { host, renderer };
+        entry = { host, renderer, ready: false, active: true, scene, interaction };
         mounts.set(key, entry);
+        const mounted = entry;
+        void Promise.resolve().then(() => {
+          if (mounted.active) return renderer.mount(host, context);
+        }).then(() => {
+          if (!mounted.active) return;
+          mounted.ready = true;
+          renderer.update(mounted.scene, mounted.interaction);
+        }).catch((error: unknown) => {
+          if (!mounted.active) return;
+          mounted.active = false;
+          renderer.destroy();
+          host.remove();
+          if (mounts.get(key) === mounted) mounts.delete(key);
+          console.error(`Renderer mount failed: ${key}`, error);
+        });
       }
 
+      entry.scene = scene;
+      entry.interaction = interaction;
       entry.host.style.zIndex = String(scene.layer);
-      entry.renderer.update(scene, interaction);
+      if (entry.ready && entry.active) entry.renderer.update(scene, interaction);
     }
 
     for (const [key, entry] of mounts) {
       if (!nextKeys.has(key)) {
+        entry.active = false;
         entry.renderer.destroy();
         entry.host.remove();
         mounts.delete(key);
