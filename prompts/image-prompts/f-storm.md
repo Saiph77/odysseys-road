@@ -1,6 +1,6 @@
 # f-storm｜最后一艘船 / The Last Ship
 
-> 来源：Prompt F｜画幅：16:9｜阶段：60 秒路演优先
+> 来源：Prompt F｜画幅：16:9
 
 ## 中文
 

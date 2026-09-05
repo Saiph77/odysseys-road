@@ -299,7 +299,7 @@ type JourneyState = Readonly<{
 }>;
 ```
 
-进入 Track 只写 `currentChapterId`；完成 Track 才追加 `completedTrackIds`。路演 release profile 中只有 Track 3 可确认，完成后直接进入 finale；Track 1/2 保留 hover/focus/dwell 反馈，但状态机必须在确认前输出“后续开放”并回到 tracking。长版 profile 才把完成卡片移到“已记起”区域，并在三条完成后进入 finale。
+进入 Track 只写 `currentChapterId`。路演 release profile 中只有 Track 3 可确认，确认后直接进入 Ch.03–06 与 finale；Track 1/2 保留 hover/focus/dwell 反馈，状态机在确认前输出「这段记忆尚未归来」并回到 tracking。
 
 只持久化 JourneyState 的非生物特征字段。摄像头样本、attention score、精确 dwell 轨迹不保存。重新开始只清理本项目自己的 namespaced key。
 
@@ -343,8 +343,7 @@ type JourneyState = Readonly<{
 - 快速扫过不会选择；armed 后移开会取消。
 - 明亮、低光、背光、眼镜、45–90cm、多脸背景。
 - 三块卡片各选择 10 次的准确率、误选率、完成时间记录为实验数据。
-- 路演版只有 Track 3 能确认，Track 1/2 无法通过 click、keyboard 或 dwell 绕过；Track 3 完成后进入 finale。
-- 长版 profile 的六种顺序都能进入 finale；Track 2/3 条件文案正确。
+- 路演版只有 Track 3 能确认，Track 1/2 无法通过 click、keyboard 或 dwell 绕过。
 
 ### 12.3 生命周期
 
@@ -359,8 +358,7 @@ type JourneyState = Readonly<{
 | --- | --- | --- |
 | P0 | 路演 release、StoryRouter/Director、真实 DOM 卡片、pointer/keyboard | 无 WebGL 走完 60 秒；只有 Track 3 可确认 |
 | P1 | capability adapter、HTMLTexture、Three scene、geometry sync | native/polyfill/dom 三路径可诊断且可交互 |
-| P2 | MediaPipe 头部方向、校准、dwell、隐私生命周期 | 拒绝权限仍完整；真实设备指标达标 |
-| P3 | 长版 Track 开放、虹膜小权重实验、shader 环、空间音频 | 长版路由通过；感知增强对照实验显著优于 P2 |
+| P2 | MediaPipe 头部方向、校准、dwell、隐私生命周期、shader 环、空间音频 | 拒绝权限仍完整；真实设备指标达标 |
 
 不得在 P0 同时引入 Three、MediaPipe 与 Shader。先证明故事图和降级路径，再逐层开启增强，才能知道问题来自哪一层。
 
@@ -395,7 +393,7 @@ type JourneyState = Readonly<{
 - `references/pear-no/src/spatial/createSpatialScene.js`
 - `references/pear-no/src/spatial/MediaPipeHeadTracker.js`
 - `references/pear-no/src/spatial/SpatialWork.jsx`
-- `docs/ODYSSEY_INTERACTIVE_SCRIPT.md`
+- `docs/ROADSHOW_60S_CUT.md`
 - `docs/ARCHITECTURE.md`
 
 ### 官方（2026-09-05 查询）

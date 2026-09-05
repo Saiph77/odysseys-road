@@ -1,6 +1,6 @@
 # 33-cattle-of-the-sun｜太阳神的牛 / The Forbidden Herd
 
-> 来源：Prompt 3.3｜画幅：16:9｜阶段：60 秒路演优先
+> 来源：Prompt 3.3｜画幅：16:9
 
 ## 中文
 

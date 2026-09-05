@@ -1,6 +1,6 @@
 # 31-sirens｜塞壬之歌 / The Song That Knows You
 
-> 来源：Prompt 3.1｜画幅：16:9｜阶段：60 秒路演优先
+> 来源：Prompt 3.1｜画幅：16:9
 
 ## 中文
 

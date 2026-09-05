@@ -1,39 +1,24 @@
-# 《归航》双语独立图像 Prompt
+# 《归航》双语图像 Prompt
 
-本目录从 `docs/ODYSSEY_INTERACTIVE_SCRIPT.md` 的生图系统与场景提示词拆分而来。每张图对应一个 Markdown 文件；每个文件都同时包含：
+每张图一个 Markdown 文件，含中文与英文的「系统风格 + 图片特色」，可独立发送给图像模型。
 
-1. 中文系统风格；
-2. 中文图片特色；
-3. English System Style；
-4. English Image Features。
+视觉连续性（角色、船只、色板、禁止项）已内嵌于各文件的系统风格段，无需额外拼接。
 
-每份文件都是可独立使用的完整交付稿，不需要返回原剧本拼接 Master Style、角色锁或 Negative Prompt。中文和英文描述在主体数量、左右位置、动作、留白与禁止项上保持一致。
+> 当前状态：人工整理稿，尚未接入 `prompt.registry.ts`。
 
-> 当前状态：人工整理稿，尚未接入 `prompt.registry.ts` 或自动生成器。视觉一致性仍需对实际图像模型进行并排测试和人工复核。
+## 场景清单（8 张）
 
-## 60 秒路演优先
-
-- [`00-prologue.md`](00-prologue.md)：木马之夜 / The Horse
-- [`01-sea-hub.md`](01-sea-hub.md)：无名之海 / The Open Sea
-- [`01b-track-selection.md`](01b-track-selection.md)：三股记忆之流 / Three Memory Currents
-- [`31-sirens.md`](31-sirens.md)：塞壬之歌 / The Song That Knows You
-- [`32-scylla-charybdis.md`](32-scylla-charybdis.md)：斯库拉与卡律布狄斯 / The Price of Passage
-- [`33-cattle-of-the-sun.md`](33-cattle-of-the-sun.md)：太阳神的牛 / The Forbidden Herd
-- [`f-storm.md`](f-storm.md)：最后一艘船 / The Last Ship
-- [`f2-ithaca.md`](f2-ithaca.md)：伊萨卡 / Ithaca
-
-## 后续长版
-
-- [`t1-cover.md`](t1-cover.md)：智慧与傲慢 / Cunning & Pride
-- [`11-lotus-eaters.md`](11-lotus-eaters.md)：莲食者之岛 / The Lotus Eaters
-- [`12-cyclops.md`](12-cyclops.md)：独眼巨人的洞穴 / Nobody
-- [`13-bag-of-winds.md`](13-bag-of-winds.md)：风神之袋 / The Bag of Winds
-- [`t2-cover.md`](t2-cover.md)：诱惑与死亡 / Desire & Death
-- [`21-closed-harbor.md`](21-closed-harbor.md)：食人巨人的港湾 / The Closed Harbor
-- [`22-circe.md`](22-circe.md)：喀耳刻的宫殿 / The Beautiful Cage
-- [`23-underworld.md`](23-underworld.md)：冥界问路 / The House of the Dead
-- [`t3-cover.md`](t3-cover.md)：歌声与牺牲 / Song & Sacrifice
+| 文件 | 章节 | 用途 |
+| --- | --- | --- |
+| [`00-prologue.md`](00-prologue.md) | Ch.01 前半 | 木马之夜 |
+| [`01-sea-hub.md`](01-sea-hub.md) | Ch.02 背景 | 无名之海 |
+| [`01b-track-selection.md`](01b-track-selection.md) | Ch.02 主体 | 三股记忆之流（Track 选择） |
+| [`31-sirens.md`](31-sirens.md) | Ch.03 | 塞壬之歌 |
+| [`32-scylla-charybdis.md`](32-scylla-charybdis.md) | Ch.04 | 斯库拉与卡律布狄斯 |
+| [`33-cattle-of-the-sun.md`](33-cattle-of-the-sun.md) | Ch.05 | 太阳神的牛 |
+| [`f-storm.md`](f-storm.md) | Ch.06 前半 | 雷击沉船 |
+| [`f2-ithaca.md`](f2-ithaca.md) | Ch.06 尾帧 | 伊萨卡归乡 |
 
 ## 使用方法
 
-选择中文或英文版本，将该语言下的“系统风格”和“图片特色”一起发送给图像模型。不要只发送图片特色，否则人物、船只、色板和排除项可能发生漂移。
+选定语言，将该语言下的「系统风格」与「图片特色」一并发送。不要只发图片特色，否则角色与船只容易漂移。

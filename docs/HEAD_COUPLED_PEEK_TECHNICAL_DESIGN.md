@@ -316,11 +316,8 @@ behavior: {
 
 ## 13. 对现有材料的影响
 
-- `ROADSHOW_60S_CUT.md`：把 Chapter 04 从操船改为探视，并更新素材预算与验收措辞。
-- `ODYSSEY_INTERACTIVE_SCRIPT.md`：把 EP 3.2 的交互含义改为“观看危险而非改写航线”。
-- Prompt 32：保持一张 16:9 主构图，明确中央安全区和左右轻微裁切可读性。
-- `PROMPT_SYSTEM_DESIGN.md`：生成体系、双语 ID 和目录不需要修改。
-- `ARCHITECTURE.md`：Router、Director、Interaction 与 Renderer 边界不需要修改。
+- `ROADSHOW_60S_CUT.md`：Chapter 04 交互为「探视危险」而非「操船」；素材预算与验收措辞已对齐。
+- Prompt 32：单张 16:9 主构图，明确中央安全区与左右裁切可读性。
 
 ## 14. 来源与验证入口
 

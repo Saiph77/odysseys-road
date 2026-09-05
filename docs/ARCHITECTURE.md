@@ -3,7 +3,7 @@
 > [Rebuilt by dev-trace init: 2026-09-05 from fresh repository scan]
 > 状态：设计草案，尚未实现
 > 范围：滚动叙事运行时、分支章节路由、多渲染层、HTML-in-Canvas、Three.js、MediaPipe、素材与 Prompt 管理
-> 权威材料：`docs/ROADSHOW_60S_CUT.md`（当前制作基准）、`docs/ODYSSEY_INTERACTIVE_SCRIPT.md`（长版蓝图）、`docs/TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md`、`references/pear-no/src/`
+> 权威材料：`docs/ROADSHOW_60S_CUT.md`、`docs/TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md`、`references/pear-no/src/`
 > 姊妹文档：`docs/PROMPT_SYSTEM_DESIGN.md`、`docs/reference/PEAR_ARCHITECTURE_AUDIT.md`
 > 更新日期：2026-09-05
 
@@ -33,8 +33,7 @@
 | 类型 | 内容 | 证据/影响 |
 | --- | --- | --- |
 | 已确认 | 当前仓库只有文档和 Pear-no 参考快照，没有应用运行时 | 2026-09-05 仓库扫描 |
-| 已确认 | 当前第一版是 60 秒路演，只完整开放 Track 3；Track 1/2 只反馈关注 | `ROADSHOW_60S_CUT.md` |
-| 已确认 | 剧本要求三个 Track 任意顺序，但 Track 内 Episode 固定顺序 | `ODYSSEY_INTERACTIVE_SCRIPT.md` |
+| 已确认 | 当前只制作 60 秒路演；Hub 展示三 Track，仅 Track 3 可确认 | `ROADSHOW_60S_CUT.md` |
 | 已确认 | WICG API 仍位于 Chromium flag 后 | WICG README，2026-09-05 查询 |
 | 已确认 | Three.js r185 的 `HTMLTexture` 仍探测 `texElementImage2D` | Three.js r185 `WebGLTextures.js` |
 | 已确认 | WICG 当前说明使用 `texElementSubImage2D` | WICG README |
@@ -53,7 +52,7 @@ odysseys-road/
 ├── README.md
 ├── docs/
 │   ├── ARCHITECTURE.md
-│   ├── ODYSSEY_INTERACTIVE_SCRIPT.md
+│   ├── ROADSHOW_60S_CUT.md
 │   ├── TRACK_SELECTION_GAZE_TECHNICAL_DESIGN.md
 │   ├── PROMPT_SYSTEM_DESIGN.md
 │   └── reference/
@@ -379,9 +378,9 @@ export const storyConfig = {
 } as const;
 ```
 
-`flow.choices` 描述长版故事图；`release.enabledTrackIds` 描述当前发布范围。路演版仍显示三张卡，但只有 `chapter-c` 可确认；以后开放 Track 1/2 只改 release profile，不改 Renderer 或凝视算法。
+`release.enabledTrackIds` 控制当前可确认的 Track。路演版显示三张卡，但只有 `chapter-c`（Track 3）可确认；将来开放 Track 1/2 只改 release profile，不改 Renderer 或凝视算法。
 
-为什么 Road 是章节局部值：长版三个 Track 有六种播放顺序。若强行给每种路径生成 0..N 全局常量，导航、恢复和调试都会再次出现重复边界。Router 决定“哪一本乐章”，Director 决定“乐章中的第几拍”。
+Road 是章节局部逻辑时间。Router 决定当前章节，Director 决定章节内的场景进度。
 
 ### 5.3 config 校验必须拒绝
 
@@ -545,7 +544,7 @@ Agent 提交 timing 变化时必须展示 config diff；禁止用藏在 JSX、CS
 
 ### 8.2 自动检查
 
-未来统一命令应覆盖：release/config、路演版只允许 Track 3、长版 Router 六种顺序契约、Road 映射/边界吸附、overlap、素材连续性、Prompt 中英文 ID 对齐、production build。HTML-in-Canvas capability probe 作为浏览器集成测试，不冒充 Node 单测。
+未来统一命令应覆盖：release/config、路演版 Track 3 单路径、Road 映射/边界吸附、overlap、素材连续性、Prompt 中英文 ID 对齐、production build。HTML-in-Canvas capability probe 作为浏览器集成测试，不冒充 Node 单测。
 
 ### 8.3 人工验收清单
 
@@ -553,7 +552,7 @@ Agent 提交 timing 变化时必须展示 config diff；禁止用藏在 JSX、CS
 - 390×844 与至少一个桌面视口；desktop/mobile tier 和 crop。
 - 键盘、pointer、touch、reduced motion；摄像头拒绝/撤销/无人脸。
 - 原生、polyfill、DOM fallback 三条路径；HTML input/button、focus、hit testing。
-- 路演版 Track 1/2 只反馈不可确认，Track 3 完成后进入 finale；长版 profile 再验收六种顺序和 Track 2/3 条件旁白。
+- 路演版 Track 1/2 只反馈不可确认，Track 3 确认后进入 finale。
 - 生产 preview；context loss；离开选择页后摄像头灯与 track 状态。
 
 ### 8.4 变更影响速查
@@ -569,10 +568,9 @@ Agent 提交 timing 变化时必须展示 config diff；禁止用藏在 JSX、CS
 
 ### 8.5 路线图
 
-- **P0：60 秒路演骨架。** release/config/manifest、Router/Director/Registry、六章 Road、Sequence placeholder、DOM、Road panel、Track 3 单一路径与降级导航。
+- **P0：60 秒路演骨架。** release/config/manifest、Router/Director/Registry、六章 Road、Sequence placeholder、DOM、Road panel、Track 3 单路径与降级导航。
 - **P1：空间选择。** ThreeHtmlRenderer、native/polyfill/DOM bridge、interaction engine、pointer/keyboard、真实 HTML hit testing。
-- **P2：感知与路演润色。** 按需 MediaPipe、dwell UX、Video/Shader、空间音频、性能预算和视觉回归。
-- **P3：长版开放。** 启用 Track 1/2、六种顺序、完成铭牌、条件旁白；复用同一运行时契约。
+- **P2：感知与路演润色。** 按需 MediaPipe、dwell UX、Video/Shader、空间音频、头部探视、性能预算和视觉回归。
 
 停止条件：任何 P2 效果都不得迫使 P0 的 story schema、Router/Director 边界或 Renderer 生命周期重写。
 

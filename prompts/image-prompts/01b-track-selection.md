@@ -1,6 +1,6 @@
 # 01b-track-selection｜三股记忆之流 / Three Memory Currents
 
-> 来源：Prompt 01B｜画幅：16:9｜阶段：60 秒路演优先
+> 来源：Prompt 01B｜画幅：16:9
 
 ## 中文
 

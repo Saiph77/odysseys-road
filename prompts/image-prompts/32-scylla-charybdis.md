@@ -1,6 +1,6 @@
 # 32-scylla-charybdis｜斯库拉与卡律布狄斯 / The Price of Passage
 
-> 来源：Prompt 3.2｜画幅：16:9｜阶段：60 秒路演优先
+> 来源：Prompt 3.2｜画幅：16:9
 
 ## 中文
 
