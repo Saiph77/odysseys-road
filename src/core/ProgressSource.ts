@@ -1,5 +1,5 @@
 import type { ProgressSource } from './contracts';
-import { mapScrollProgress } from './timeline';
+import { mapScrollProgress, rawProgressFromMapped } from './timeline';
 
 type Publish = (rawProgress: number) => void;
 
@@ -16,18 +16,27 @@ export class ScrollProgressSource implements ProgressSource {
 
   private publish: Publish | null = null;
 
+  private pendingFrame: number | null = null;
+
   private readonly onScroll = () => {
-    this.publish?.(readScrollProgress());
+    if (this.pendingFrame !== null) return;
+    this.pendingFrame = window.requestAnimationFrame(() => {
+      this.pendingFrame = null;
+      this.publish?.(readScrollProgress());
+    });
   };
 
   start(publish: Publish) {
+    this.stop();
     this.publish = publish;
     window.addEventListener('scroll', this.onScroll, { passive: true });
     window.addEventListener('resize', this.onScroll, { passive: true });
-    this.onScroll();
+    publish(readScrollProgress());
   }
 
   stop() {
+    if (this.pendingFrame !== null) window.cancelAnimationFrame(this.pendingFrame);
+    this.pendingFrame = null;
     window.removeEventListener('scroll', this.onScroll);
     window.removeEventListener('resize', this.onScroll);
     this.publish = null;
@@ -60,5 +69,5 @@ export function scrollToProgress(progress: number) {
   const stage = document.querySelector<HTMLElement>('.stage');
   if (!stage) return;
   const maxScroll = stage.scrollHeight - window.innerHeight;
-  window.scrollTo({ top: maxScroll * Math.min(1, Math.max(0, progress)), behavior: 'auto' });
+  window.scrollTo({ top: Math.max(0, maxScroll) * rawProgressFromMapped(progress), behavior: 'auto' });
 }
