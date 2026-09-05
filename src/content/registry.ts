@@ -22,10 +22,7 @@ export const contentRegistry: ContentRegistry = {
     variant: 'title',
   },
   'stinger-outro': {
-    lines: [
-      '素材来源：《THE ODYSSEY》官方预告片',
-      '仅用于非商业学习与展示 · 滚动返回顶部',
-    ],
+    lines: ['结尾文案待确认', '滚动返回顶部'],
     align: 'center',
     variant: 'outro',
   },

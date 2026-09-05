@@ -80,6 +80,9 @@ export const storyConfig = {
         },
         {
           id: 'origin-captions',
+          behavior: {
+            dom: { revealSpan: 0.12, stagger: 0.04, offset: 12, backdrop: 0, label: true },
+          },
           road: { start: 0, end: 700 },
           blend: { in: 0, out: 0 },
           layer: 50,
@@ -95,6 +98,7 @@ export const storyConfig = {
       scenes: [
         {
           id: 'ithaca-card',
+          behavior: { dom: { revealSpan: 0.22, stagger: 0.06, offset: 18, backdrop: 1 } },
           road: { start: 0, end: 60 },
           blend: { in: 0, out: 0 },
           layer: 50,
@@ -161,6 +165,7 @@ export const storyConfig = {
         },
         {
           id: 'trials-card',
+          behavior: { dom: { revealSpan: 0.22, stagger: 0.06, offset: 18, backdrop: 1 } },
           road: { start: 160, end: 240 },
           blend: { in: 0, out: 0 },
           layer: 50,
@@ -310,6 +315,7 @@ export const storyConfig = {
       scenes: [
         {
           id: 'stinger-title',
+          behavior: { dom: { revealSpan: 0.22, stagger: 0.1, offset: 18, backdrop: 1 } },
           road: { start: 0, end: 150 },
           blend: { in: 0, out: 0 },
           layer: 50,
@@ -335,6 +341,7 @@ export const storyConfig = {
         },
         {
           id: 'stinger-outro',
+          behavior: { dom: { revealSpan: 0.22, stagger: 0.1, offset: 18, backdrop: 1 } },
           road: { start: 380, end: 500 },
           blend: { in: 0, out: 0 },
           layer: 50,

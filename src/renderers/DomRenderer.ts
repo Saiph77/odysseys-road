@@ -1,4 +1,9 @@
-import type { InteractionFrame, RendererContext, SceneFrame, SceneRenderer } from '../core/contracts';
+import type {
+  InteractionFrame,
+  RendererContext,
+  SceneFrame,
+  SceneRenderer,
+} from '../core/contracts';
 
 const NEUTRAL_INTERACTION: InteractionFrame = {
   x: 0,
@@ -48,13 +53,22 @@ export class DomRenderer implements SceneRenderer {
       });
     }
 
+    const settings = scene.behavior?.dom as
+      | { revealSpan: number; stagger: number; offset: number; backdrop: number; label?: boolean }
+      | undefined;
     this.panel.style.opacity = String(scene.opacity);
-    const reveal = Math.min(1, scene.localProgress * 1.2);
+    this.panel.style.backgroundColor = `rgba(0,0,0,${settings?.backdrop ?? 0})`;
+    this.panel.dataset.label = String(settings?.label ?? false);
     this.lines.forEach((line, index) => {
-      const threshold = (index + 1) / this.lines.length;
-      const visible = reveal >= threshold * 0.85;
-      line.style.opacity = visible ? '1' : '0';
-      line.style.transform = visible ? 'translateY(0)' : 'translateY(0.6rem)';
+      const progress = settings
+        ? Math.min(
+            1,
+            Math.max(0, (scene.localProgress - index * settings.stagger) / settings.revealSpan),
+          )
+        : 1;
+      const eased = progress * progress * (3 - 2 * progress);
+      line.style.opacity = String(eased);
+      line.style.transform = `translateY(${this.context?.reducedMotion ? 0 : (1 - eased) * (settings?.offset ?? 0)}px)`;
     });
   }
 

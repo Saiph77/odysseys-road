@@ -45,33 +45,31 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 12vh 8vw calc(12vh + 12%) 8vw;
+  padding: 8vh 8vw 20vh;
   text-align: center;
   pointer-events: none;
 }
 
-.dom-scene[data-variant='chapter'] {
-  background: rgba(0, 0, 0, 0.72);
+.dom-scene[data-label='true'] {
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
-.dom-scene[data-variant='title'] {
-  background: rgba(0, 0, 0, 0.88);
-}
-
-.dom-scene[data-variant='outro'] {
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.85));
+.dom-scene[data-label='true'] .dom-scene__line {
+  font-size: 0.8rem;
+  text-shadow: 0 1px 6px #000;
 }
 
 .dom-scene__line {
   margin: 0.35rem 0;
   font-size: clamp(1.2rem, 3vw, 2.4rem);
   letter-spacing: 0.08em;
-  transition: opacity 0.2s linear, transform 0.2s linear;
 }
 
 .stage {
   position: relative;
   width: 100%;
+  pointer-events: none;
 }
 
 .chapter-nav {
