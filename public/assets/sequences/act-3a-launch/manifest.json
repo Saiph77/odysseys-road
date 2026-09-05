@@ -1,0 +1,19 @@
+{
+  "id": "act-3a-launch",
+  "source": "/Users/saiph/Downloads/66443bfd-1e56-4625-9cc6-2d318172909a.mp4",
+  "extractedAt": "2026-09-05",
+  "tiers": {
+    "desktop": {
+      "count": 154,
+      "pattern": "frame-%04d.jpg",
+      "width": 1280,
+      "height": null,
+      "fps": 24,
+      "format": "jpg"
+    }
+  },
+  "scroll": {
+    "note": "Map scroll progress 0..1 → frame index 1..count (see tools/sequence-scroll-preview)",
+    "recommendedRoadLength": null
+  }
+}
